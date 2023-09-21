@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import json
 import os
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,14 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0mi25o7ay+mkyr=a#nvtff-rm--dnj9g#jb4m($=gx9)7b1#hn'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SECRETS_DIR = BASE_DIR / '.secrets'
+SECRET = json.load(open(os.path.join(SECRETS_DIR, 'secret.json')))
+SECRET_KEY = SECRET['SECRET_KEY']
 
 # Application definition
 
@@ -80,7 +81,7 @@ WSGI_APPLICATION = 'sure.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 #SECRETS_DIR = BASE_DIR / 'secrets.json'
-db = json.load(open(os.path.join(BASE_DIR, 'secrets.json')))
+db = json.load(open(os.path.join(SECRETS_DIR, 'db.json')))
 
 DATABASES = {
     'default': {
