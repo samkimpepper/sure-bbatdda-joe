@@ -12,7 +12,7 @@
   </head>
 
   <body>
-    {% include 'dangun_app/nav.html' %}
+    {% include 'nav.html' %}
 
     <div class="content-box section1">
       <div class="container between flex-box">
@@ -21,7 +21,9 @@
           <h4>동네라서 가능한 모든것<br>당근에서 가까운 이웃과 함께해요.</h4>
           <div class="flex-box gap16">
             <button class="flex-box gap8">
-              <img src="{% static 'img/icon_googleplay.png' %}" alt=""/>Google Play</button>
+              <img src="{% static 'img/icon_googleplay.png' %}" alt=""/>
+              Google Play</button>
+              
             <button class="flex-box gap8">
               <img src="{% static 'img/icon_appstore.png' %}" alt=""/>App Store</button>
           </div>
@@ -35,7 +37,7 @@
         <div class="description-box">
           <h1>우리 동네<br>중고 직거래 마켓</h1>
           <p>동네 주민들과 가깝고 따뜻한 거래를 지금 경험해보세요</p>
-          <a href="{% url 'dangun_app:trade' %}">
+            <a href="">
             <button class="button-gray">인기매물 보기</button>
           </a>
         </div>
@@ -84,37 +86,36 @@
       <h1>중고거래 인기매물</h1>
       <div class="full-box trade-box">
         <div class="flex-box full-box card-container between">
-          {% for post in posts %}
+
 
             <div class="card-box">
-              <a href="{% url 'dangun_app:trade_post' post.pk %}" class="trade-text-link">
+              <a href="" class="trade-text-link">
                 <div class="card-img">
-                  {% if post.images %}
-                    <img src="{{ post.images.url }}" alt="{{ post.title }}">
-                  {% endif %}
+                  
+                    <img src="" alt="">
+                  
                 </div>
                 <div class="card-info-box">
-                  <h5>{{ post.title }}</h5>
-                  <p class="bold">{{ post.price |intcomma}}원</p>
-                  <p>{{ post.location }}</p>
+                  <h5></h5>
+                  <p class="bold">원</p>
+                  <p></p>
                   <div class="flex-box">
                     <p>조회
-                      {{ post.view_num }}</p>
+                      </p>
                     <p>·</p>
                     <p>채팅
-                      {{ post.chat_num }}</p>
+                      </p>
                   </div>
                 </div>
               </a>
             </div>
-          {% endfor %}
 
         </div>
         <a href="/trade">인기매물 더 보기</a>
       </div>
     </div>
   </div>
-  {% include 'dangun_app/footer.html' %}
+  {% include 'footer.html' %}
 
 </body>
 
