@@ -49,6 +49,8 @@
                   <label for="location" class="block-box">거래 희망 장소</label>
                   <input type="text" name="location" placeholder="거래를 희망하는 장소" required="required" value="{% if Goods %}{{ Goods.location }}{% endif %}">
                 </div>
+                <div id="map" style="width: 100%; height: 400px;"></div>
+                <input type="hidden" id="location" name="location" value="{% if Goods %}{{ Goods.location }}{% endif %}">
                 <div class="submit-button-box">
                   {% if Goods %}
                     <button type="submit">수정하기</button>
@@ -90,7 +92,7 @@
               marker = L.marker([parseFloat(latlng[0]), parseFloat(latlng[1])]).addTo(map);
           }
       </script>
-
       </body>
 
     </html>
+
