@@ -5,6 +5,7 @@ from .sure_app_urls.urls_chat import urlpatterns as sure_app_chat_urls
 from .sure_app_urls.urls_user import urlpatterns as sure_app_user_urls
 
 # from .sure_app_urls.urls_goods import urlpatterns as sure_app_goods_urls
+app_name = ""
 
 urlpatterns = [
     path('', views.main, name='main'),
