@@ -60,8 +60,36 @@
             </div>
           </div>
         {% endblock %}
-
         <script type="text/javascript" src="{% static 'js/write.js' %}"></script>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+        <script>
+          var map = L.map('map').setView([37.5665, 126.9780], 13); // 초기 지도 중심 위치 설정
+      
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+      
+          var marker;
+      
+          map.on('click', function(e) {
+              if (marker) {
+                  map.removeLayer(marker);
+              }
+              
+              var locationInput = document.getElementById('location');
+              locationInput.value = e.latlng.lat + ',' + e.latlng.lng;
+              
+              marker = L.marker(e.latlng).addTo(map);
+          });
+      
+          var savedLocation = document.getElementById('location').value;
+          if (savedLocation) {
+              var latlng = savedLocation.split(',');
+              marker = L.marker([parseFloat(latlng[0]), parseFloat(latlng[1])]).addTo(map);
+          }
+      </script>
 
       </body>
 
