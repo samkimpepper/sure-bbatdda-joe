@@ -23,6 +23,7 @@ class Goods(models.Model):
     like_cnt = models.IntegerField(default=0)
     chat_cnt = models.IntegerField(default=0)
     uploaded_date = models.DateTimeField(auto_now_add=True)
+    view_cnt = models.IntegerField(default=0) #조회수 컬럼 추가 by 오준경
 
 class Like(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
@@ -35,7 +36,8 @@ class Chat(models.Model):
 
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_message', default=None)
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_message', default=None)
     text = models.TextField()
     status = models.BooleanField()
     img = models.TextField()
