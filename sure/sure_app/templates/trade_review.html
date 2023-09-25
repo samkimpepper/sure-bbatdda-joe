@@ -1,0 +1,86 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/trade_review.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
+    <title>채팅하기</title>
+  </head>
+
+  <body class="back-ye">
+    {% include 'nav.html' %}
+    <div class="content-box">
+      <div class="container column">
+        <div class="post-box flex-box">
+
+         
+
+          <!-- 채팅창-->
+          <div class="chat-main-container">
+            <div>
+              <div class="contact-info flex-box">
+                상대방아이디
+                <div class="temp">
+                  36.9도
+                </div>
+              </div>
+
+              <!--물품정보-->
+              <div class="goods-box flex-box between">
+                <div class="flex-box">
+                  <div class="selected-thumbnail-box">
+                    <img src="" alt="">
+                  </div>
+                  <div class="goods-info-box">
+                    <p>거래한 상품</p>
+                    <p class="bold">LG 냉장고</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="icons flex-box">
+                <div class="icon-container">
+                    <img src="{% static 'img/bad.png' %}">
+                    <span>별로에요!</span>
+                </div>
+                <div class="icon-container">
+                    <img src="{% static 'img/good.png' %}">
+                    <span>좋아요!</span>
+                </div>
+                <div class="icon-container">
+                    <img src="{% static 'img/excellent.png' %}">
+                    <span>최고에요!</span>
+                </div>
+              </div>
+
+              
+            </div>
+
+            <div class="text-container">
+                <span class="main-title">사용자님에게 감사 인사를 남겨보세요.</span><br>
+                <span class="sub-title">작성된 내용은 상대방 프로필에 공개됩니다.</span>
+            </div>
+
+            <form class="chat-input" action="submit">
+              <textarea name="" id="" cols="30" rows="10" placeholder="거래 후기를 남겨주세요!"></textarea>
+              <div>
+                <button>입력</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% include 'footer.html' %}
+
+  </body>
+
+</html>
