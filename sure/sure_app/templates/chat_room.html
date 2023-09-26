@@ -1,61 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Chat Room</title>
-</head>
-
-<body>
+{% load static %}
+<div class="chat-main-container">
     <div>
-        <strong>Your username:</strong>
-        <span id="user-name">{{ user.username }}</span><br>
-        <strong>Room number:</strong>
-        <span id="room-name">{{ room_name }}</span> <!-- 여기에 room_name을 표시합니다 -->
+      <div class="contact-info flex-box">
+        상대방아이디
+        <div class="temp">
+          36.9도
+        </div>
+      </div>
+
+      <!--물품정보-->
+      <div class="goods-box flex-box between">
+        <div class="flex-box">
+          <div class="selected-thumbnail-box">
+            <img src="" alt="">
+          </div>
+          <div class="goods-info-box">
+            <p>LG 양문형 냉장고 778L</p>
+            <p class="bold">150,000원</p>
+          </div>
+        </div>
+        <button>거래완료</button>
+      </div>
+
+      <!--채팅창 메인-->
+      <div class="chat-container">
+        {# TODO: 웹소켓으로 실시간 채팅 기능 구현하기 #}
+        <div class="message-box from-you">
+          <div class="message-text">입금확인했습니다~</div>
+          <p class="s-text">오전 8:20</p>
+        </div>
+        <div class="message-box from-me">
+          <p class="s-text">오전 8:20</p>
+          <div class="message-text">네 좋은물건 감사합니다~</div>
+        </div>
+      </div>
     </div>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    
-</body>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const roomName = document.getElementById('room-name').textContent.trim(); // 페이지에서 room_name을 가져옵니다
-        const userName = document.getElementById('user-name').textContent.trim();
 
-        const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
-        );
-
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            const chatLog = document.querySelector('#chat-log');
-            chatLog.value += (data.username + ': ' + data.message + '\n');
-        };
-
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
-
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#chat-message-submit').click();
-            }
-        };
-
-        document.querySelector('#chat-message-submit').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'username': userName,
-                'message': message
-            }));
-            messageInputDom.value = '';
-        };
-    });
-</script>
-</html>
+    <form class="chat-input" action="submit">
+      <textarea name="" id="" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
+      <div>
+        <button>전송</button>
+      </div>
+    </form>
+</div>

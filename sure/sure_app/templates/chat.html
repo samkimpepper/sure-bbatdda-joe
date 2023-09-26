@@ -38,6 +38,7 @@
             </div>
 
             <!-- 채팅 리스트 -->
+            {# {% include 'chat_list.html' %} #}
             <div class="chat-list-box flex-box column">
               <!-- 봇 -->
               <div class="chat-box flex-box">
@@ -49,6 +50,7 @@
                   <p class="chat-thumb-text">궁금한 내용을 물어보세요!</p>
                 </div>
               </div>
+
               <!-- 채팅방리스트 -->
               <div class="flex-box chat-box between">
                 <div>
@@ -62,11 +64,14 @@
                 <div class="thumbnail-box">
                   <img src="" alt="">
                 </div>
+
+                {# TODO: 채팅 리스트 불러오기#}
               </div>
             </div>
           </div>
 
           <!-- 채팅창-->
+          {# {% include 'chat_room.html' %} #}
           <div class="chat-main-container">
             <div>
               <div class="contact-info flex-box">
@@ -92,6 +97,7 @@
 
               <!--채팅창 메인-->
               <div class="chat-container">
+                {# TODO: 웹소켓으로 실시간 채팅 기능 구현하기 #}
                 <div class="message-box from-you">
                   <div class="message-text">입금확인했습니다~</div>
                   <p class="s-text">오전 8:20</p>
@@ -106,7 +112,7 @@
             <form class="chat-input" action="submit">
               <textarea name="" id="" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
               <div>
-                <button>전송</button>
+                <button id="chat-submit">전송</button>
               </div>
             </form>
           </div>
@@ -116,5 +122,7 @@
     {% include 'footer.html' %}
 
   </body>
-
+  
+  <script>
+  </script>
 </html>
