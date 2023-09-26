@@ -12,6 +12,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/trade_review.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/trade_modal.css' %}"/>
     <title>채팅하기</title>
   </head>
 
@@ -47,15 +49,15 @@
               </div>
 
               <div class="icons flex-box">
-                <div class="icon-container">
+                <div class="icon-container" id="bad">
                     <img src="{% static 'img/bad.png' %}">
                     <span>별로에요!</span>
                 </div>
-                <div class="icon-container">
+                <div class="icon-container" id="good">
                     <img src="{% static 'img/good.png' %}">
                     <span>좋아요!</span>
                 </div>
-                <div class="icon-container">
+                <div class="icon-container" id="excellent">
                     <img src="{% static 'img/excellent.png' %}">
                     <span>최고에요!</span>
                 </div>
@@ -79,7 +81,59 @@
         </div>
       </div>
     </div>
+
+    <button class="trigger">팝업 띄우기 테스트</button>
+
+    <div class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3>사용자님과 다이슨 청소기 상품을 거래하셨나요?</h3>
+        <div class="button-container">
+          <button id="submit">예, 거래했어요.</button>
+          <button id="cancel">취소</button>
+        </div>
+      </div>
+    </div>
     {% include 'footer.html' %}
+
+
+    <script>
+      // 초기 선택 없음
+      let selectedIcon = null;
+    
+      // 아이콘 클릭 함수
+      function selectIcon(iconId, imageName, textColor) {
+        if (selectedIcon !== iconId) {
+          // 이미지 변경
+          document.getElementById(iconId).getElementsByTagName("img")[0].src = `/static/img/${imageName}.png`;
+          // 다른 아이콘 초기화
+          if (selectedIcon) {
+            document.getElementById(selectedIcon).getElementsByTagName("img")[0].src = `/static/img/${selectedIcon}.png`;
+            document.getElementById(selectedIcon).getElementsByTagName("span")[0].style.color = "#cad0d5"; // 이전 선택 해제
+          }
+          selectedIcon = iconId;
+          document.getElementById(iconId).getElementsByTagName("span")[0].style.color = textColor; // 현재 선택
+        }
+      }
+    
+      // 별로에요 아이콘 클릭 시
+      document.getElementById("bad").addEventListener("click", function() {
+        selectIcon("bad", "bad_active", "black");
+      });
+    
+      // 좋아요 아이콘 클릭 시
+      document.getElementById("good").addEventListener("click", function() {
+        selectIcon("good", "good_active", "#74c88a");
+      });
+    
+      // 최고에요 아이콘 클릭 시
+      document.getElementById("excellent").addEventListener("click", function() {
+        selectIcon("excellent", "excellent_active", "orange");
+      });
+    </script>
+    
+    
+    <script type="text/javascript" src="{% static 'js/trade_modal.js' %}"></script>
 
   </body>
 

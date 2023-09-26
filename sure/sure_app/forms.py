@@ -1,4 +1,5 @@
 from django import forms
+from .models import Goods
 
 # 로그인 
 class LoginForm(forms.Form):
@@ -29,3 +30,9 @@ class RegistrationForm(forms.Form):
         label='비밀번호 확인',
         label_suffix='', 
     )
+
+# 게시물
+class GoodsForm(forms.ModelForm):
+    class Meta:
+        model = Goods
+        fields = ['title', 'content', 'price', 'location', 'img']
