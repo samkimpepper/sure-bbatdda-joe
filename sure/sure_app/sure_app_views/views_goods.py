@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from ..models import *
 from ..models import Goods
-
+from ..forms import GoodsForm
 
 
 #인기 매물 페이지 by 준경
@@ -46,31 +46,33 @@ def trade_post(request, good_id):
 #글쓰기 페이지 by 진혁
 #@login_required
 def write(request, goods_id=None):
-
     if request.method == "POST":
-        if goods_id:
-            goods = Goods.objects.get(id=goods_id)
-        else:
-            goods = Goods()
+        form = GoodsForm(request.POST, request.FILES)
 
-        goods.user = request.user
-        goods.title = request.POST.get("title")
-        goods.content = request.POST.get("description")
-        goods.price = request.POST.get("price")
-        goods.location = request.POST.get("location")
+        if form.is_valid():
+            goods = form.save(commit=False)
+            goods.user = request.user
 
-        if 'images' in request.FILES:
-            goods.img = request.FILES['images']
+            if goods_id:
+                existing_goods = get_object_or_404(Goods, id=goods_id, user=request.user)
+                existing_goods.title = goods.title
+                existing_goods.content = goods.content
+                existing_goods.price = goods.price
+                existing_goods.location = goods.location
 
-        goods.save()
+                if 'images' in request.FILES:
+                    existing_goods.img = request.FILES['images']
 
-        return redirect('trade_post.html')
+                existing_goods.save()
+                return redirect('trade_post', good_id=existing_goods.id)
+            else:
+                goods.save()
+                return redirect('trade_post', good_id=goods.id)
     else:
         goods = None
-        if goods_id:
-            goods = Goods.objects.get(id=goods_id)
+        form = GoodsForm(instance=goods)
 
-        return render(request, 'write.html', {'Goods': goods})
+    return render(request, 'write.html', {'Goods': goods, 'form': form})
     
 
 #거래후기 by 채림
