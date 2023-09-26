@@ -20,15 +20,15 @@
       <div class="container column">
         <div class="post-box">
           {% block content %}
-            <img src="{{ post.images.url }}" alt="{{ post.title }}" class="block-box">
+            <img src="{{ good.imgs.url }}" alt="{{ good.title }}" class="block-box">
             <div class="flex-box between info-button-box">
               <div class="user-info">
-                <h6>{{ post.user }}</h6>
-                <p>{{ post.location }}</p>
+                <h6>{{ good.user }}</h6>
+                <p>{{ good.location }}</p>
               </div>
-              {% if request.user.username == post.user.username %}
+              {% if request.user.username == good.user.username %}
                 <div class="flex-box button-box">
-                  <a href="{% url 'edit' post.id %}">
+                  <a href="{% url 'edit' good.id %}">
                     <button class="grey">수정하기</button>
                   </a>
                   <button class="orange">채팅보기</button>
@@ -36,7 +36,7 @@
               {% else %}
                 <div class="button-box">
                   <a href="{% url 'chat' %}">
-                    <button class="orange">채팅하기</button>
+                    <button class="orange" id="start-chat">채팅하기</button>
                   </a>
                 </div>
               {% endif %}
@@ -44,16 +44,16 @@
             <hr class="line">
             <div class="post-info-box">
               <div class="flex-box between">
-                <h3>{{ post.title }}</h3>
-                <h3>{{ post.price |intcomma}}
+                <h3>{{ good.title }}</h3>
+                <h3>{{ good.price |intcomma}}
                   원</h3>
               </div>
               <p>{{ post.description }}</p>
               <div class="location-views-box flex-box between">
                 <p>희망 거래장소 |
-                  {{ post.location }}</p>
+                  {{ good.location }}</p>
                 <p>조회수
-                  {{ post.view_num }}</p>
+                  {{ good.view_cnt }}</p>
               </div>
             </div>
           {% endblock %}
@@ -64,4 +64,21 @@
 
   </body>
 
+  {% comment %} 채팅관련 스크립트 by 유진 {% endcomment %}
+  <script>
+    function startChat() {
+      // TODO: 고정시켜놓은 변수 동적으로 바꾸기
+      const goods_id = 1;
+      const seller_id = 2;
+      const buyer_id = 3;
+      const chatSocket = new WebSocket(
+        'ws://' + window.location.host + 
+        '/ws/chat/' + goods_id + '/' + seller_id + '/' + buyer_id 
+        å);
+    }
+
+    const startChatBtn = document.querySelector('#start-chat');
+    startChatBtn.addEventListener('click', startChat );
+
+  </script>
 </html>

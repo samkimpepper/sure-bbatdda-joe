@@ -3,96 +3,131 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
-    <title>거래 글쓰기</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/write.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
-  </head>
+<head>
+  <title>거래 글쓰기</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/write.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}" />
+</head>
 
-  <body>
-    {% include 'nav.html' %}
-    <div class="content-box">
-      <div class="container">
+<body>
+  {% include 'nav.html' %}
+  <div class="content-box">
+    <div class="container">
 
-        {% block content %}
-          <div class="about-trade">
-            <div class="container">
-              <form class="write-box" method="POST" action="{% if Goods %}{% url 'write' Goods.id %}{% else %}{% url 'write' %}{% endif %}" enctype="multipart/form-data">
-                
-                {% csrf_token %}
-                <div class="flex-box">
-                  <label class="img-upload">
-                    <img src="{% if Goods %}{{ Goods.img.url }}{% else %}{% static 'img/icon_photo.png' %}{% endif %}" alt="이미지 설명" id="imagePreview">
-                    <input type="file" name="images" accept="image/*" style="display: none;" onchange="previewImage(event);">
-                  </label>
-                  <div>
-                    <div class="flex-box column baseline title-box">
-                      <label for="title">글 제목</label>
-                      <input type="text" name="title" placeholder="글 제목" required="required" value="{% if Goods %}{{ Goods.title }}{% endif %}">
-                      <label for=" price">가격</label>
-                      <input type="text" name="price" placeholder="가격" required="required" value="{% if Goods %}{{ Goods.price }}{% endif %}">
-                    </div>
-                  </div>
-                </div>
-                <div class="full-box">
-                  <label for="description" class="block-box">물품 설명</label>
-                  <textarea name="description" required="required">
-                    {% if Goods %}{{ Goods.content }}
-                    {% endif %}
-                  </textarea>
+      {% block content %}
+      <div class="about-trade">
+        <div class="container">
+          <form class="write-box" method="POST" action="{% if Goods %}{% url 'write' Goods.id %}{% else %}{% url 'write' %}{% endif %}" enctype="multipart/form-data">
 
+            {% csrf_token %}
+            <div class="flex-box">
+              <label class="img-upload">
+                <img src="{% if Goods %}{{ Goods.img.url }}{% else %}{% static 'img/icon_photo.png' %}{% endif %}" alt="이미지 설명" id="imagePreview">
+                <input type="file" name="images" accept="image/*" style="display: none;" onchange="previewImage(event);">
+              </label>
+              <div>
+                <div class="flex-box column baseline title-box">
+                  <label for="title">글 제목</label>
+                  <input type="text" name="title" placeholder="글 제목" required="required" value="{% if Goods %}{{ Goods.title }}{% endif %}">
+                  <label for="price">가격</label>
+                  <input type="text" name="price" placeholder="가격" required="required" value="{% if Goods %}{{ Goods.price }}{% endif %}">
                 </div>
-                <div class="full-box">
-                  <label for="location" class="block-box">거래 희망 장소</label>
-                  <input type="text" name="location" placeholder="거래를 희망하는 장소" required="required" value="{% if Goods %}{{ Goods.location }}{% endif %}">
-                </div>
-                <div id="map" style="width: 100%; height: 400px;"></div>
-                <input type="hidden" id="location" name="location" value="{% if Goods %}{{ Goods.location }}{% endif %}">
-                <div class="submit-button-box">
-                  {% if Goods %}
-                    <button type="submit">수정하기</button>
-                  {% else %}
-                    <button type="submit">전송</button>
-                  {% endif %}
-                </div>
-              </form>
+              </div>
             </div>
-          </div>
-        {% endblock %}
-        <script type="text/javascript" src="{% static 'js/write.js' %}"></script>
-        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+            <div class="full-box">
+              <label for="description" class="block-box">물품 설명</label>
+              <textarea name="description" required="required">{% if Goods %}{{ Goods.content }}{% endif %}</textarea>
+            </div>
+            <div class="full-box">
+              <label for="location" class="block-box">거래 희망 장소</label>
+              <input type="text" name="location" placeholder="거래를 희망하는 장소" required="required" value="{% if Goods %}{{ Goods.location }}{% endif %}">
+            </div>
+            <div id="map" style="width: 100%; height: 400px;"></div>
+            <div id="current-location">
+              <p id="current-location-info"></p>
+            </div>
+            <input type="hidden" id="location" name="location" value="{% if Goods %}{{ Goods.location }}{% endif %}">
+            <div class="submit-button-box">
+              {% if Goods %}
+              <button type="submit">수정하기</button>
+              {% else %}
+              <button type="submit">전송</button>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endblock %}
+      <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=06b71a5db40aca812f7ae8bff82d58b9&libraries=services"></script>
+      <script>
+        function previewImage(event) {
+          var imagePreview = document.getElementById('imagePreview');
+          var input = event.target;
 
-        <script>
-          var map = L.map('map').setView([37.5665, 126.9780], 13); // 초기 지도 중심 위치 설정
-      
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }).addTo(map);
-      
-          var marker;
-      
-          map.on('click', function(e) {
-              if (marker) {
-                  map.removeLayer(marker);
-              }
-              
-              var locationInput = document.getElementById('location');
-              locationInput.value = e.latlng.lat + ',' + e.latlng.lng;
-              
-              marker = L.marker(e.latlng).addTo(map);
-          });
-      
-          var savedLocation = document.getElementById('location').value;
-          if (savedLocation) {
-              var latlng = savedLocation.split(',');
-              marker = L.marker([parseFloat(latlng[0]), parseFloat(latlng[1])]).addTo(map);
+          var reader = new FileReader();
+          reader.onload = function() {
+            imagePreview.src = reader.result;
+          };
+          reader.readAsDataURL(input.files[0]);
+        }
+
+        var container = document.getElementById('map');
+        var options = {
+          center: new kakao.maps.LatLng(37.5665, 126.9780),
+          level: 13
+        };
+
+        var map = new kakao.maps.Map(container, options);
+
+        var marker;
+
+        kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+          var latlng = mouseEvent.latLng;
+
+          if (marker) {
+            marker.setMap(null);
           }
-      </script>
-      </body>
 
-    </html>
+          marker = new kakao.maps.Marker({
+            position: latlng
+          });
+
+          marker.setMap(map);
+
+          var locationInput = document.getElementById('location');
+          locationInput.value = latlng.getLat() + ',' + latlng.getLng();
+        });
+
+
+        // 현재 위치 가져오기 수정
+        function getCurrentLocation() {
+          if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              var latitude = position.coords.latitude;
+              var longitude = position.coords.longitude;
+
+              // 위치 정보를 표시할 엘리먼트에 내용 업데이트
+              var locationInfo = document.getElementById('current-location-info');
+              locationInfo.textContent = "위도: " + latitude + ", 경도: " + longitude;
+
+              // 위경도로 지도 이동 및 마커 생성
+              setMapToCurrentLocation(latitude, longitude);
+
+            }, function(error) {
+              console.error("Error getting location: " + error.message);
+            });
+          } else {
+            console.error("Geolocation is not supported by your browser.");
+          }
+        }
+
+        // 페이지 로딩 시 현재 위치 가져오기
+        getCurrentLocation();
+      </script>
+</body>
+
+</html>
 
