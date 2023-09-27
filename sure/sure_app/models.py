@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     manner_tmp = models.DecimalField(max_digits=5, decimal_places=2)
-    location = models.CharField(null=True)
+    location = models.CharField(null=True, max_length=100)
     created_date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -14,11 +14,11 @@ class User(AbstractUser):
     
 class Goods(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField()
+    title = models.CharField(max_length=50)
     content = models.TextField()
     price = models.IntegerField()
     img = models.TextField()
-    location = models.CharField()
+    location = models.CharField(max_length=100)
     status = models.BooleanField(default=False)
     like_cnt = models.IntegerField(default=0)
     chat_cnt = models.IntegerField(default=0)
@@ -45,5 +45,17 @@ class Message(models.Model):
 
 class Alarm(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.ForeignKey(Message, on_delete=models.CASCADE)
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, null=True)
+    content = models.CharField(max_length=50, null=True)
+    link = models.TextField(null=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+class Review(models.Model):
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_review')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_review')
+    content = models.TextField()
+    manner_score = models.IntegerField() # 3 최고에요, 2 좋아요, 1 별로에요
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
