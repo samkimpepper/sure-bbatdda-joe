@@ -4,7 +4,7 @@ from django.db.models import Q
 from ..models import *
 from ..models import Goods
 from ..forms import GoodsForm
-
+from ..models import Like
 
 #인기 매물 페이지 by 준경
 def trade(request):
