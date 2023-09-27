@@ -19,7 +19,7 @@
       <div class="container column center">
         <div class="region-setting-box full-box">
           <label for="region-setting">내 동네 설정</label>
-          <form method="POST" action="/set_region/" id="region-form">
+          <form method="POST" action="/user/set_location/" id="region-form">
             {% csrf_token %}
             <div class="flex-box full-box between region-input">
               <input type="text" id="region-setting" class="region-setting" name="region-setting" placeholder="예) 서울 강서구 화곡동" value="{{ region }}">
@@ -37,7 +37,7 @@
         <div id="map" style="width: 100%; height: 468px; margin-top: 44px"></div>
         <h5 id="region-info">현재 위치는</h5>
         <h5 id="region-judge"></h5>
-        <form id="region-certification-form" method="POST" action="/set_region_certification/" class="full-box">
+        <form id="region-certification-form" method="POST" action="/user/set_location_certification/" class="full-box">
           {% csrf_token %}
           <button id="region-save-button" class="primary-button">동네인증하기</button>
         </form>

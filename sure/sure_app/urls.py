@@ -14,6 +14,6 @@ urlpatterns = [
     path('user/', include(sure_app_user_urls)),
     path('goods/', include(sure_app_goods_urls)),
     
-    path('chat/', include(sure_app_chat_urls)),
+    path('chatting/', include(sure_app_chat_urls)),
     path('alarm/', include(sure_app_alarm_urls)),
 ]

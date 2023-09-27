@@ -38,7 +38,6 @@
             </div>
 
             <!-- 채팅 리스트 -->
-            {# {% include 'chat_list.html' %} #}
             <div class="chat-list-box flex-box column">
               <!-- 봇 -->
               <div class="chat-box flex-box">
@@ -71,7 +70,6 @@
           </div>
 
           <!-- 채팅창-->
-          {# {% include 'chat_room.html' %} #}
           <div class="chat-main-container">
             <div>
               <div class="contact-info flex-box">
@@ -109,8 +107,8 @@
               </div>
             </div>
 
-            <form class="chat-input" action="submit">
-              <textarea name="" id="" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
+            <form class="chat-input" onsubmit="return false;">
+              <textarea name="" id="chat-textarea" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
               <div>
                 <button id="chat-submit">전송</button>
               </div>
@@ -124,5 +122,68 @@
   </body>
   
   <script>
+    // const goods_id = 1;
+    // const seller_id = 2;
+    // const buyer_id = 3;
+    
+
+    // 소켓 연결
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + 5
+        + '/'
+    );
+
+    // 메시지 응답
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chatContainer = document.querySelector('.chat-container');
+        // let fromMeOrYou = "";
+        // if (data.username == buyer_id) {fromMeOrYou = "from-me";}
+        // else {fromMeOrYou = "from-you";}
+
+        const html = `
+        <div class="message-box from-me">
+          <p class="s-text">오전 8:20</p>
+          <div class="message-text">${data.message}</div>
+        </div>`;
+        chatContainer.insertAdjacentHTML(
+          'beforeend',
+          html
+        );
+    };
+
+    
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    
+    // 메시지 전송
+    document.querySelector('#chat-submit').onclick = function(e) {
+      const messageInputDom = document.querySelector('#chat-textarea');
+      const message = messageInputDom.value;
+      chatSocket.send(JSON.stringify({
+        'username': 1,
+        'message': message
+      }));
+      messageInputDom.value = '';
+    };
+
+    document.querySelector('#chat-textarea').focus();
+    
+    document.querySelector('#chat-textarea').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-submit').click();
+        }
+    };
+
+    document.querySelector('.chat-input').addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent the default form submission
+      // Your code to send the message via WebSocket here
+    });
+
   </script>
 </html>

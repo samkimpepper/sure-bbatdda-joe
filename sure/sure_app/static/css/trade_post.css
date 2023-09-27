@@ -86,3 +86,12 @@ hr{
     opacity: 0.5;
     margin-top: 40px;
 }
+
+.like-button {
+    background: none;
+    border: none;
+    color: #fa6616;
+}
+.like-button:hover {
+     color: #d94b34; 
+}

@@ -8,21 +8,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 
-# 동네인증 화면
-@login_required
-def location(request):
-    try:
-        user_profile = User.objects.get(user_id=request.user)
-        region = user_profile.region
-    except User.DoesNotExist:
-        region = None
-
-    return render(request, 'location.html', {'region': region})
-
 # User model 커스터마이징시 
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+# 회원가입
 def register(request):
     error_message = ''
     if request.method == 'POST':
@@ -39,11 +29,7 @@ def register(request):
             if password1 == password2:
                 # 새로운 유저를 생성
                 user = User.objects.create_user(username=username, password=password1)
-                
-                # 유저를 로그인 상태로 만듦
-                auth_login(request, user)
-            
-            
+                messages.success(request, "가입완료")
                 return redirect('login')
             else:
                 form.add_error('password2', 'Passwords do not match')
@@ -53,7 +39,7 @@ def register(request):
     return render(request, 'register.html', {'form': form, 'error_message': error_message})
 
 
-# 로그인 화면
+# 로그인
 def login(request):
     # 이미 로그인한 경우
     if request.user.is_authenticated:
@@ -73,23 +59,34 @@ def login(request):
 
                 # 로그인이 성공한 경우
                 if user is not None:
-                    login(request, user) # 로그인 처리 및 세션에 사용자 정보 저장
+                    auth_login(request, user) # 로그인 처리 및 세션에 사용자 정보 저장
                     return redirect('main')  # 리다이렉션
         return render(request, 'login.html', {'form': form}) #폼을 템플릿으로 전달
-    
+
+# 동네인증
+@login_required
+def location_auth(request):
+    try:
+        user_profile = User.objects.get(username=request.user)
+        location = user_profile.location
+    except User.DoesNotExist:
+        location = None
+
+    return render(request, 'location.html', {'location': location})
+
 # 지역설정
 @login_required
-def set_region(request):
+def set_location(request):
     if request.method == "POST":
-        region = request.POST.get('region-setting')
+        location = request.POST.get('region-setting')
 
-        if region:
+        if location:
             try:
                 user_profile, created = User.objects.get_or_create(user=request.user)
-                user_profile.region = region
+                user_profile.location = location
                 user_profile.save()
 
-                return redirect('dangun_app:location')
+                return redirect('location')
             except Exception as e:
                 return JsonResponse({"status": "error", "message": str(e)})
         else:
@@ -99,9 +96,9 @@ def set_region(request):
 
 # 지역인증 완료
 @login_required
-def set_region_certification(request):
+def set_location_certification(request):
     if request.method == "POST":
         request.user.profile.region_certification = 'Y'
         request.user.profile.save()
         messages.success(request, "인증되었습니다")
-        return redirect('dangun_app:location')
+        return redirect('location')
