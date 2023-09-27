@@ -11,4 +11,5 @@ urlpatterns = [
     path('trade/review/', views_goods.trade_review, name='review'),
     path('write/<int:good_id>/', views_goods.write,name='write'),   # 수정 시 URL 
     path('write/', views_goods.write,name='write'),  # 새 글 작성 시 URL 
+    path('like/<int:good_id>/', views_goods.like_post, name='like_post'),#좋아요 기능
 ]
