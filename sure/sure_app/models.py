@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.conf import settings
 
 # Create your models here.
 
@@ -12,12 +12,13 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
     
+    
 class Goods(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     content = models.TextField()
     price = models.IntegerField()
-    img = models.TextField()
+    img = models.ImageField(upload_to='uploads/')
     location = models.CharField(max_length=100)
     status = models.BooleanField(default=False)
     like_cnt = models.IntegerField(default=0)
@@ -26,8 +27,9 @@ class Goods(models.Model):
     view_cnt = models.IntegerField(default=0) #조회수 컬럼 추가 by 오준경
 
 class Like(models.Model):
-    goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
+    goods = models.ForeignKey(Goods, on_delete=models.CASCADE, related_name='likes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
 
 class Chat(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
