@@ -70,6 +70,24 @@ def write(request, good_id=None):
     return render(request,'write.html',{'form':form})
     
 
+# trade_post 좋아요 버튼 by 진혁
+def like_post(request, good_id):
+    if request.user.is_authenticated:
+        good = get_object_or_404(Goods, id=good_id)
+        user = request.user
+
+        if Like.objects.filter(goods=good, user=user).exists():
+            # 이미 '좋아요'를 눌렀다면 '좋아요' 제거
+            Like.objects.filter(goods=good, user=user).delete()
+        else:
+            # '좋아요' 추가
+            Like.objects.create(goods=good, user=user)
+
+        return redirect('trade_post', good_id=good.id)
+    else:
+        return redirect('login')
+
+
 #거래후기 by 채림
 def trade_review(request):
     return render(request, 'trade_review.html')
