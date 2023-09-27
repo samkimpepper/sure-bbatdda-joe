@@ -1,0 +1,30 @@
+{% load static %}
+<div class="chat-list-box flex-box column">
+    <!-- 봇 -->
+    <div class="chat-box flex-box">
+      <div class="ai-profile">
+        <img src="{% static 'img/icon_aibot.png'%}" alt="">
+      </div>
+      <div>
+        <p class="bold">AI 챗봇</p>
+        <p class="chat-thumb-text">궁금한 내용을 물어보세요!</p>
+      </div>
+    </div>
+
+    <!-- 채팅방리스트 -->
+    <div class="flex-box chat-box between">
+      <div>
+        <div class="flex-box">
+          <p class="bold">상대방아이디</p>
+          <p class="s-text">화곡동</p>
+          <p class="s-text">3주전</p>
+        </div>
+        <p class="chat-thumb-text">거래 잘 하셨나요? 거래한 이웃..</p>
+      </div>
+      <div class="thumbnail-box">
+        <img src="" alt="">
+      </div>
+
+      {# TODO: 채팅 리시트 불러오기#}
+    </div>
+  </div>

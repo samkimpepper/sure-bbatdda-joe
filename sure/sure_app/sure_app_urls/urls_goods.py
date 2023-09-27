@@ -7,5 +7,8 @@ urlpatterns = [
     path('trade', views_goods.trade, name='trade'),
     path('trade_post/<int:good_id>/',views_goods.trade_post,name='trade_post'),
     path('write', views_goods.write, name='write'),
-    # path('search', views_goods.search, name='search'),
+    path('search', views_goods.search, name='search'),
+    path('trade/review/', views_goods.trade_review, name='review'),
+    path('write/<int:good_id>/', views_goods.write,name='write'),   # 수정 시 URL 
+    path('write/', views_goods.write,name='write'),  # 새 글 작성 시 URL 
 ]

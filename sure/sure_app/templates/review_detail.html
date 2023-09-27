@@ -1,0 +1,61 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/review-detail.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
+
+    <title>채팅하기</title>
+  </head>
+
+  <body class="back-ye">
+    {% include 'nav.html' %}
+    <div class="content-box">
+      <div class="container column">
+        <div class="post-box flex-box">
+
+         
+
+          <!-- 채팅창-->
+          <div class="chat-main-container">
+            <div>
+              <div class="contact-info flex-box">
+                받은 거래 후기
+              </div>
+
+
+
+              <div class="title flex-box">
+
+                <span class="title-text">사용자님이 보낸 따뜻한 후기가 도착했어요.</span>
+                <img src="{% static 'img/review_detail.png' %}"/>
+              </div>
+
+              <div class="content-box flex-box">
+                <span class="receiver">To.사용자</span><br>
+                <p class="content">와주셔서 감사합니다. 물건이 깨끗하네요, 어쩌구. 저쩌구. 어쩌구.</p>
+              </div>
+
+              
+            </div>
+
+
+
+        </div>
+      </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+
+  </body>
+
+</html>
