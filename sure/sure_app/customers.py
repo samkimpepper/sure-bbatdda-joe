@@ -3,10 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.goods_id = self.scope["url_route"]["kwargs"]["goods_id"]
-        self.seller_id = self.scope["url_route"]["kwargs"]["seller_id"]
-        self.buyer_id = self.scope["url_route"]["kwargs"]["buyer_id"]
-        self.room_group_name = "chat_%s" % self.goods_id + self.seller_id + self.buyer_id
+        self.room_name = self.scope["url_route"]["kwargs"]["chat_id"]
+        self.room_group_name = "chat_%s" % self.room_name
 
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -21,13 +19,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         username = text_data_json["username"]  # username을 추출
+        print(message)
 
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name, {
                 "type": "chat_message",
                 "message": message,
-                "username": username  # username을 함께 전송
+                "username": username,  # username을 함께 전송
             }
         )
 
