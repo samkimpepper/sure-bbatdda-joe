@@ -63,7 +63,7 @@ def login(request):
                     return redirect('main')  # 리다이렉션
         return render(request, 'login.html', {'form': form}) #폼을 템플릿으로 전달
 
-# 동네인증 화면
+# 동네인증
 @login_required
 def location_auth(request):
     try:
