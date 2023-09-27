@@ -45,34 +45,29 @@ def trade_post(request, good_id):
 
 #글쓰기 페이지 by 진혁
 #@login_required
-def write(request, goods_id=None):
+def write(request, good_id=None):
     if request.method == "POST":
-        form = GoodsForm(request.POST, request.FILES)
+        if good_id:  
+            goods = get_object_or_404(Goods, id=good_id)
+            form = GoodsForm(request.POST or None, request.FILES or None, instance=goods)
+        else:  
+            form = GoodsForm(request.POST or None, request.FILES or None)
 
         if form.is_valid():
             goods = form.save(commit=False)
             goods.user = request.user
+            goods.save()
+            
+            return redirect('trade_post', good_id=goods.id) 
 
-            if goods_id:
-                existing_goods = get_object_or_404(Goods, id=goods_id, user=request.user)
-                existing_goods.title = goods.title
-                existing_goods.content = goods.content
-                existing_goods.price = goods.price
-                existing_goods.location = goods.location
+    else:  
+        if good_id:
+            goods = get_object_or_404(Goods, id=good_id)
+            form = GoodsForm(instance=goods)
+        else:
+            form = GoodsForm()
 
-                if 'images' in request.FILES:
-                    existing_goods.img = request.FILES['images']
-
-                existing_goods.save()
-                return redirect('trade_post', good_id=existing_goods.id)
-            else:
-                goods.save()
-                return redirect('trade_post', good_id=goods.id)
-    else:
-        goods = None
-        form = GoodsForm(instance=goods)
-
-    return render(request, 'write.html', {'Goods': goods, 'form': form})
+    return render(request,'write.html',{'form':form})
     
 
 #거래후기 by 채림
