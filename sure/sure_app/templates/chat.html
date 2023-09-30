@@ -63,9 +63,28 @@
                 <div class="thumbnail-box">
                   <img src="" alt="">
                 </div>
-
-                {# TODO: 채팅 리스트 불러오기#}
               </div>
+
+              {# TODO: 채팅 리스트 불러오기#}
+              {% for chat, message in chat_and_mesage_list %}
+              <div class="flex-box chat-box between">
+                <div>
+                  <div class="flex-box">
+                    <p class="bold">
+                      {% if chat.user1.id == user_id %} {{ chat.user2.username }}
+                      {% else %} {{ chat.user1.username }}
+                      {% endif %}
+                    </p>
+                    <p class="s-text"> {{chat.user.location}} </p>
+                    <p class="s-text">3주전</p>
+                  </div>
+                  <p class="chat-thumb-text"> {{message.text}}</p>
+                </div>
+                <div class="thumbnail-box">
+                  <img src="" alt="">
+                </div>
+              </div>
+              {% endfor %}
             </div>
           </div>
 
@@ -96,14 +115,6 @@
               <!--채팅창 메인-->
               <div class="chat-container">
                 {# TODO: 웹소켓으로 실시간 채팅 기능 구현하기 #}
-                <div class="message-box from-you">
-                  <div class="message-text">입금확인했습니다~</div>
-                  <p class="s-text">오전 8:20</p>
-                </div>
-                <div class="message-box from-me">
-                  <p class="s-text">오전 8:20</p>
-                  <div class="message-text">네 좋은물건 감사합니다~</div>
-                </div>
               </div>
             </div>
 
@@ -124,49 +135,91 @@
   <script>
     // const goods_id = 1;
     // const seller_id = 2;
-    // const buyer_id = 3;
+    // const chatId = {{ chat_id }}
+    const chatId = 32; // TODO: chatID 동적으로 변경
+    const userId = {{ user_id }};
+    const GET_MESSAGE_URI = `http://localhost:8000/chatting/messages/${chatId}`;
     
 
-    // 소켓 연결
+    // 소켓을 연결합니다.
     const chatSocket = new WebSocket(
         'ws://'
         + window.location.host
         + '/ws/chat/'
-        + 5
+        + chatId
         + '/'
     );
 
-    // 메시지 응답
+    // 내 메시지에 해당하는 html을 넘겨줍니다.
+    function getFromMeHtml(message) {
+      return `
+      <div class="message-box from-me">
+        <p class="s-text">오전 8:20</p>
+        <div class="message-text">${message}</div>
+      </div>`;
+    }
+
+    // 상대방의 메시지에 해당하는 html을 넘겨줍니다.
+    // TODO: 메시지 받은 시간 동적으로 변경
+    function getFromYouHtml(message) {
+      return `
+      <div class="message-box from-you">
+        <div class="message-text">${message}</div>
+        <p class="s-text">오전 8:20</p>
+      </div>
+      `
+    }
+
+    // 이전의 메시지를 그리는 함수입니다.
+    function drawMessages(result) {
+      const chatContainer = document.querySelector('.chat-container');
+      let html = '';
+      for (let item of result) {
+        if(item.sender_id == userId) {
+          html += getFromMeHtml(item.text);
+        } else {
+          html += getFromYouHtml(item.text);
+        }
+      }
+      chatContainer.insertAdjacentHTML('beforeend', html);
+    }
+
+    // 스크롤를 맨 아래로 내려주는 함수입니다.
+    function moveScrollToBottom() {
+      const chatContainer = document.querySelector('.chat-container');
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    chatSocket.onopen = async function(e) {
+      const response = await fetch(GET_MESSAGE_URI);
+      const result = await response.json();
+      drawMessages(result);
+      moveScrollToBottom();
+    }
+
+    // 소켓에서 메시지 응답시 호출되며, 화면에 메시지를 그려줍니다.
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const chatContainer = document.querySelector('.chat-container');
-        // let fromMeOrYou = "";
-        // if (data.username == buyer_id) {fromMeOrYou = "from-me";}
-        // else {fromMeOrYou = "from-you";}
-
-        const html = `
-        <div class="message-box from-me">
-          <p class="s-text">오전 8:20</p>
-          <div class="message-text">${data.message}</div>
-        </div>`;
-        chatContainer.insertAdjacentHTML(
-          'beforeend',
-          html
-        );
+        let html = '';
+        if (data.sender == userId) {html = getFromMeHtml(data.message);}
+        else {html = getFromYouHtml(data.message);}
+        chatContainer.insertAdjacentHTML('beforeend', html);
+        moveScrollToBottom();
     };
 
-    
+    // 소켓 연결시 호출됩니다.
     chatSocket.onclose = function(e) {
         console.error('Chat socket closed unexpectedly');
     };
 
     
-    // 메시지 전송
+    // 메시지를 전송하고 inputDom을 지워줍니다. 
     document.querySelector('#chat-submit').onclick = function(e) {
       const messageInputDom = document.querySelector('#chat-textarea');
       const message = messageInputDom.value;
       chatSocket.send(JSON.stringify({
-        'username': 1,
+        'sender': userId,
         'message': message
       }));
       messageInputDom.value = '';
@@ -180,9 +233,9 @@
         }
     };
 
+    // Prevent the default form submission
     document.querySelector('.chat-input').addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent the default form submission
-      // Your code to send the message via WebSocket here
+      e.preventDefault();
     });
 
   </script>

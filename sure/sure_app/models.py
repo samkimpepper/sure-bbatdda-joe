@@ -33,17 +33,17 @@ class Like(models.Model):
 
 class Chat(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buyer_chat')
-    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='seller_chat')
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buyer_chat')
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='seller_chat')
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_message', default=None)
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_message', default=None)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat_messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_message', default=None, null=True)
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_message', default=None, null=True)
     text = models.TextField()
-    status = models.BooleanField()
-    img = models.TextField()
-    send_date = models.DateTimeField()
+    status = models.BooleanField(default=False)
+    img = models.TextField(null=True)
+    send_date = models.DateTimeField(auto_now_add=True, null=True)
 
 class Alarm(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
