@@ -197,7 +197,9 @@ hr{
 .chat-container{
     padding: 14px 20px;
     max-height: 500px;
-    overflow-y: auto; 
+    overflow-y: auto;
+    height: 260px;
+    overflow-x: hidden; 
 }
 
 .message-box{
