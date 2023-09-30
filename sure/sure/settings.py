@@ -150,3 +150,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'sure_app.User'
 
 LOGIN_URL = 'login'
+
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = 'true'
