@@ -5,6 +5,8 @@ from ..models import *
 from ..models import Goods
 from ..forms import GoodsForm
 from ..models import Like
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 #인기 매물 페이지 by 준경
 def trade(request):
@@ -90,4 +92,47 @@ def like_post(request, good_id):
 
 #거래후기 by 채림
 def trade_review(request):
+    if request.method == 'POST':
+        data = request.POST
+        user = request.user
+
+        buyer = User.objects.get(id=user.id)
+        seller = User.objects.get(id=data.get('seller'))
+
+        review = Review.objects.create(
+            buyer=buyer,
+            seller=seller,
+            manner_score=data.get('manner_score'),
+            content=data.get('content')
+        )
+
+        content = f"{buyer.username}님이 후기를 보내셨습니다."
+        link = "detail/" + str(review.id) + "/"
+
+        Alarm.objects.create(user=seller, content=content, link=link)
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user{seller.id}", {
+                "type": "receive_review",
+                "content": content,
+                "link": link
+            }
+        )
+
+        async_to_sync(channel_layer.group_send)(
+            f"user{seller.id}", {
+                "type": "alarm_cnt",
+                "alarm_cnt": Alarm.objects.filter(user=seller.id, is_read=False).count()
+            }
+        )
+
+        return redirect('review')
+
     return render(request, 'trade_review.html')
+
+
+#후기 상세 by 채림
+def review_detail(request, review_id):
+    review = Review.objects.get(id=review_id)
+    return render(request, 'review_detail.html', {"review":review})
