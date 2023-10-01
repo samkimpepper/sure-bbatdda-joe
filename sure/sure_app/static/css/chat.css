@@ -196,9 +196,8 @@ hr{
 /* 채팅창 메인 */
 .chat-container{
     padding: 14px 20px;
-    max-height: 500px;
+    max-height: 260px;
     overflow-y: auto;
-    height: 260px;
     overflow-x: hidden; 
 }
 
@@ -222,6 +221,17 @@ hr{
 .from-me div{
     background-color: #fa6616;
     color: #fff;
+}
+
+.not-start-chatting{
+    /* background-color: #818181; */
+    width: initial;
+    height: -webkit-fill-available;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    color: #757575;
+    font-size: 15px;
 }
 
 /* 작성창 */

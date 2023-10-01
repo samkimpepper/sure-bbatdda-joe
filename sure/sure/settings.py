@@ -152,3 +152,8 @@ AUTH_USER_MODEL = 'sure_app.User'
 LOGIN_URL = 'login'
 
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = 'true'
+
+# re_path(r"ws/alarm/", AlarmConsumer.as_asgi()),
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
