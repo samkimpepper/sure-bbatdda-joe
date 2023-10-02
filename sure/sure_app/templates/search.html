@@ -12,6 +12,15 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>검색결과</title>
+    <style> 
+      {% for result in results %}
+      {% if result.status %}
+      .card-box[data-id="{{ result.id }}"] img {
+        filter: brightness(0.3);
+      }
+      {% endif %}
+      {% endfor %}
+    </style>
   </head>
 
   <body>
@@ -22,24 +31,22 @@
           <div class="full-box trade-box column">
             <div class="flex-box full-box card-container between">
               {% for result in results %}
-
-                <div class="card-box">
+                <div class="card-box" data-id="{{ result.id }}">
                   <a href="{% url 'trade_post' result.id %}" class="trade-text-link">
                     <div class="card-img">
-                      {% if result.img %}
-                        <img src="{{ result.img.url }}" alt="{{ result.title }}">
+                      <img src="{{ result.img.url }}" alt="{{ result.title }}">
+                      {% if result.status %}
+                        <div class="overlay-text">판매완료</div>
                       {% endif %}
                     </div>
                     <div class="card-info-box">
                       <h5>{{ result.title }}</h5>
-                      <p class="bold">{{ result.price |intcomma}}원</p>
+                      <p class="bold">{{ result.price | intcomma }}원</p>
                       <p>{{ result.location }}</p>
                       <div class="flex-box">
-                        <p>관심
-                          {{ result.like_cnt }}</p>
+                        <p>관심 {{ result.like_cnt }}</p>
                         <p>·</p>
-                        <p>채팅
-                          {{ result.chat_cnt }}</p>
+                        <p>채팅 {{ result.chat_cnt }}</p>
                       </div>
                     </div>
                   </a>
