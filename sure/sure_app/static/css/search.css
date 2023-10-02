@@ -159,13 +159,15 @@ a {
 .card-container{
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .card-box{
   flex: 0 0 23%;
+  margin:12px;
   margin-bottom: 55px;
 }
+
 
 .card-box:hover{
   opacity: 0.8;
