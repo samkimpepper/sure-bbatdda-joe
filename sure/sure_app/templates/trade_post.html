@@ -37,7 +37,7 @@
         <div class="post-box">
           {% block content %}
           <img
-            src="{{ good.imgs.url }}"
+            src="{{ good.img.url }}"
             alt="{{ good.title }}"
             class="block-box"
           />
@@ -55,8 +55,8 @@
             </div>
             {% else %}
             <div class="button-box">
-              {# TODO: 고정된 값 수정 #}
-              <a href="{% url 'chatting' chat_id=5 %}">
+              {# TODO: you_id 동적으로 변경하기 #}
+              <a href="{% url 'chatting_and_chat_id' goods_id=good.id you_id=21 %}">
                 <button class="orange" id="start-chat">채팅하기</button>
               </a>
             </div>
