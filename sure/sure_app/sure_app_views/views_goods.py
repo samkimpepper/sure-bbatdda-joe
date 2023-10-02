@@ -7,6 +7,7 @@ from ..forms import GoodsForm
 from ..models import Like
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.http import JsonResponse
 
 #인기 매물 페이지 by 준경
 def trade(request):
@@ -136,3 +137,19 @@ def trade_review(request):
 def review_detail(request, review_id):
     review = Review.objects.get(id=review_id)
     return render(request, 'review_detail.html', {"review":review})
+
+
+# 매물 정보 가져오기 by 유진
+def trade_retrieve(request, goods_id):
+    goods = get_object_or_404(Goods, id=goods_id)
+    you = get_object_or_404(User, id=goods.user.id)
+    
+    context = {
+        'goods_title': goods.title,
+        'goods_img': goods.img.url if goods.img else '',
+        'goods_price': goods.price,
+        'you_username': you.username,
+        'you_manner_tmp': you.manner_tmp
+    }
+    print(context)
+    return JsonResponse(context, safe=False)
