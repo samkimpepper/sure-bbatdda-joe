@@ -79,3 +79,18 @@ input{
 .dropdown:hover .dropdown-content{
     display:block;
 }
+
+.alarm_cnt {
+    position: absolute;
+    top: 0;
+    right: 15;
+    z-index: 3;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    text-align: center;
+    background-color: red;
+    color: white;
+    border-radius: 15px;
+    display: inline-block;
+}
