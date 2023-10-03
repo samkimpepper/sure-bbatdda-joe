@@ -11,7 +11,7 @@ from django.http import JsonResponse
 
 #인기 매물 페이지 by 준경
 def trade(request):
-    goods = Goods.objects.filter(status=False).order_by('-view_cnt')
+    goods = Goods.objects.order_by('status', '-view_cnt')
     print(goods)
     return render(request, 'trade.html', {'goods': goods})
 
@@ -22,10 +22,8 @@ def search(request):
         Q(title__icontains=keyword)     |
         Q(content__icontains=keyword)   |
         Q(location__icontains=keyword)  |
-        Q(price__icontains=keyword),
-        status=False        
-          # 데이터베이스에서 검색
-    ).distinct().order_by('-view_cnt','-like_cnt','-chat_cnt')
+        Q(price__icontains=keyword)      # 데이터베이스에서 검색
+    ).distinct().order_by('status','-view_cnt','-like_cnt','-chat_cnt')
     return render(request, 'search.html', {'results': results, 'search': keyword})
 
 
