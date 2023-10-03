@@ -102,6 +102,8 @@ h1{
   flex: 0 0 23%;
   margin:12px;
   margin-bottom: 55px;
+  position: relative;
+
 }
 
 .card-box:hover{
@@ -140,6 +142,23 @@ h1{
   width: 100%;
 }
 
+.card-box .overlay-text {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 24px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1;
+  display: none;
+}
+
+.card-box .overlay-text {
+  display: block;
+}
 
 .floating-button {
     position: fixed;
@@ -167,3 +186,4 @@ h1{
     background-color: #ff8534; 
     cursor: pointer;
 }
+
