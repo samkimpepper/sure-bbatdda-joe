@@ -159,13 +159,16 @@ a {
 .card-container{
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .card-box{
   flex: 0 0 23%;
+  margin:12px;
   margin-bottom: 55px;
+  position: relative;
 }
+
 
 .card-box:hover{
   opacity: 0.8;
@@ -201,6 +204,24 @@ a {
 
 .card-info-box h5{
   width: 100%;
+}
+
+.card-box .overlay-text {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 24px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1;
+  display: none;
+}
+
+.card-box .overlay-text {
+  display: block;
 }
 
 

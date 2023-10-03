@@ -1,4 +1,3 @@
-
 $(document).ready(function() {
     var user_id = document.getElementById('user_id').textContent;
     console.log(user_id);
@@ -14,6 +13,13 @@ $(document).ready(function() {
         console.log('서버로부터 데이터 수신:', data);
         console.log(data.content);
         
+        var dropdown = document.querySelector(".dropdown-content");
+        var a = document.createElement('a');
+        a.textContent = data.content;
+        a.href = data.link;
+        $('.alarm_cnt').textContent = data.alarm_cnt;
+
+        dropdown.appendChild(a);
     });
 
 });
