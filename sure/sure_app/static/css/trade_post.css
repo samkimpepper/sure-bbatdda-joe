@@ -95,3 +95,17 @@ hr{
 .like-button:hover {
      color: #d94b34; 
 }
+
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 24px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1;
+    display: none;
+  }
