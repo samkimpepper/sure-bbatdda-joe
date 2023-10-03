@@ -26,8 +26,24 @@
       type="text/css"
       href="{% static 'css/footer.css' %}"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    >
     <title>중고거래 상세보기</title>
+    <style>
+      img{
+        {% if good.status %}
+          filter: brightness(0.3);
+        {% endif %}
+      }
+      
+      {% if good.status %}
+        img + .overlay-text {
+          display: block;
+        }
+      {% endif %}
+    </style>
   </head>
 
   <body>
@@ -41,6 +57,7 @@
             alt="{{ good.title }}"
             class="block-box"
           />
+          <div class="overlay-text">판매완료</div>
           <div class="flex-box between info-button-box">
             <div class="user-info">
               <h6>{{ good.user }}</h6>
@@ -89,6 +106,7 @@
                 <p>조회수 {{ good.view_cnt }}</p>
               </div>
             </div>
+          </div>
           {% endblock %}
         </div>
       </div>
