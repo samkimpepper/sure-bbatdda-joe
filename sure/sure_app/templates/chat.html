@@ -34,7 +34,7 @@
                 <div>
                   <label>
                     안읽은 메세지만 보기
-                    <input type="checkbox" name="" id="">
+                    <input type="checkbox" name="" id="get-is-new" onclick='drawIsNewMessages()'>
                   </label>
                 </div>
               </div>
@@ -56,7 +56,7 @@
               <!-- 채팅방리스트 -->
               {# TODO: 채팅 리스트 불러오기#} 
               {% for chat, message, img_url in chat_and_message_list %}
-                <div class="flex-box chat-box between" onclick='connectNewWebsocket({{chat.id}}, {{chat.goods_id}}); deleteIsNew(event)'>
+                <div class="flex-box chat-box between" onclick='connectNewWebsocket({{chat.id}}, {{chat.goods_id}}); deleteIsNew(this); colorOnlyThisElem(this);'>
                   <div>
                     <div class="flex-box">
                       <p class="bold">
@@ -128,12 +128,7 @@
                 <div style="display: flex; justify-content: center;align-items: center;">채팅을 시작해보세요!</div>
               </div>
             </div>
-            {% endif %}
-
-            <form class="chat-input" onsubmit="return false;">
-              <textarea name="" id="chat-textarea" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
-              <div> <button id="chat-submit">전송</button> </div>
-            </form>
+            {% endif %} 
           </div>
         </div>
       </div>
@@ -279,7 +274,7 @@
       chatContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    // 스크롤를 맨 아래로 내려주는 함수입니다.
+    // 스크롤을 맨 아래로 내려주는 함수입니다.
     function moveScrollToBottom() {
       const chatContainer = document.querySelector('.chat-container');
       chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -308,10 +303,32 @@
       e.preventDefault();
     });
 
-  
-    // 채팅목록 클릭시 배경이 변하게 합니다.
-    // $('.chat-box').click(function(event) {
-    //   $(this).css('background-color', 'gray');
-    // });
+    function drawIsNewMessages() {
+      const checkbox = document.querySelector('#get-is-new');
+      const isChecked = checkbox.checked;
+      const chattingRoomList = document.querySelectorAll(".flex-box.chat-box.between");
+      
+      if (isChecked) {
+        for (let chattingRoom of chattingRoomList) {
+          let isNew = chattingRoom.querySelector('.is-new');
+          if (isNew == null) {
+            chattingRoom.classList.add('hidden');
+          }
+        }
+      }
+      else {
+        for (let chattingRoom of chattingRoomList) {
+          chattingRoom.classList.remove('hidden');
+        }
+      }  
+    }
+
+    function colorOnlyThisElem(e) {
+      const chattingRoomList = document.querySelectorAll(".flex-box.chat-box.between");
+      for (let chattingRoom of chattingRoomList) {
+        chattingRoom.classList.remove('is-clicked'); 
+      }
+      e.classList.add('is-clicked');
+    }
   </script>
 </html>
