@@ -48,27 +48,27 @@ def trade_post(request, good_id):
 #@login_required
 def write(request, good_id=None):
     if request.method == "POST":
-        if good_id:  
+        if good_id:
             goods = get_object_or_404(Goods, id=good_id)
-            form = GoodsForm(request.POST or None, request.FILES or None, instance=goods)
-        else:  
-            form = GoodsForm(request.POST or None, request.FILES or None)
+            form = GoodsForm(request.POST, request.FILES, instance=goods)
+        else:
+            form = GoodsForm(request.POST, request.FILES)
 
         if form.is_valid():
             goods = form.save(commit=False)
             goods.user = request.user
             goods.save()
             
-            return redirect('trade_post', good_id=goods.id) 
+            return redirect('trade_post', good_id=goods.id)
 
-    else:  
+    else:
         if good_id:
             goods = get_object_or_404(Goods, id=good_id)
             form = GoodsForm(instance=goods)
         else:
             form = GoodsForm()
 
-    return render(request,'write.html',{'form':form})
+    return render(request, 'write.html', {'form': form})
     
 
 # trade_post 좋아요 버튼 by 진혁
