@@ -58,8 +58,6 @@ input{
     color: black;
 }
 
-
-
 .dropdown {
     position: relative;
     cursor: pointer;
@@ -72,6 +70,7 @@ input{
     color: gray;
     min-width: 160px;
     min-height: 160px;
+    max-height:160px;
     border:#d7d7d7 solid 1px;
     padding: 15px;
 }
@@ -96,21 +95,25 @@ input{
 }
 
 .dropdown-ul {
-    max-height: 160px;
-    overflow-y: auto;
-    
+    height: 160px;
+    overflow-y: scroll;
 }
 
 .dropdown-ul li {
-    padding: 8px;
+    padding: 5px;
+
+}
+
+.dropdown-ul li:hover {
+    background-color: #f3f3f3;
 }
 
 .dropdown-ul::-webkit-scrollbar {
-    width: 8px; /* 스크롤바 너비 */
+    width: 5px; /* 스크롤바 너비 */
   }
   
 .dropdown-ul::-webkit-scrollbar-thumb {
-background-color: #888; /* 스크롤바 색상 */
-border-radius: 4px; /* 스크롤바 모양 지정 (선택사항) */
+    background-color: lightgray; /* 스크롤바 색상 */
+    border-radius: 4px; /* 스크롤바 모양 지정 (선택사항) */
 }
 

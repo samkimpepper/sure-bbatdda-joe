@@ -7,6 +7,7 @@ from django.conf import settings
 class User(AbstractUser):
     manner_tmp = models.DecimalField(max_digits=5, decimal_places=2)
     location = models.CharField(null=True, max_length=100)
+    location_certification = models.CharField(max_length=1, default='N')
     created_date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
