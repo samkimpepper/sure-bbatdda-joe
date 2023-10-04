@@ -26,37 +26,45 @@ $(document).ready(function() {
                 li.setAttribute('data-link', data.alarms[i].link);
                 li.classList.add('alarm');
                 li.setAttribute('data-alarm-id', data.alarms[i].id);
-                dropdown.appendChild(a);
+                dropdown.appendChild(li);
             }
+            liClickEvent();
             return;
         }
+        else if(data.type == "alarm_cnt") {
+            document.getElementById('alarmCnt').textContent = data.alarm_cnt;
+        }
         
-        var dropdown = document.querySelector(".dropdown-content");
-        var a = document.createElement('a');
+        var dropdown = document.querySelector(".dropdown-ul");
+        var a = document.createElement('li');
         a.textContent = data.content;
-        a.href = data.link;
-        $('.alarm_cnt').textContent = data.alarm_cnt;
+        a.setAttribute('data-link', data.link);
+        a.setAttribute('data-alarm-id', data.alarm_id);
+        a.classList.add('alarm');
 
         dropdown.appendChild(a);
     });
 
-    var aElements = documement.querySelectorAll('.alarm');
+    function liClickEvent(){
+        var aElements = document.querySelectorAll('.alarm');
 
-    aElements.forEach(function(a) {
-        a.addEventListener('click', function(event) {
-            event.preventDefault();
-            var alarmId = event.currentTarget.getAttribute('data-alarm-id');
-
-            // 이제 해당 알람을 읽었다고 서버에 알리기 위해 요청할 건데 HTTP 요청을 할지 웹소켓으로 할지 모르겠음
-            $.ajax({
-                url: '/alarm/read/' + alarmId + '/',
-                type: 'POST',
-                success: function(data) {
-                    var link = event.currentTarget.getAttribute('data-link');
-                    window.location.href = link;
-                }
+        aElements.forEach(function(a) {
+            a.addEventListener('click', function(event) {
+                event.preventDefault();
+                var alarmId = event.currentTarget.getAttribute('data-alarm-id');
+                var link = event.currentTarget.getAttribute('data-link');
+    
+                // 이제 해당 알람을 읽었다고 서버에 알리기 위해 요청할 건데 HTTP 요청을 할지 웹소켓으로 할지 모르겠음
+                $.ajax({
+                    url: '/alarm/read/' + alarmId + '/',
+                    type: 'POST',
+                    success: function(data) {
+                        window.location.href = link;
+                    }
+                });
             });
         });
-    });
+    }
+
 
 });

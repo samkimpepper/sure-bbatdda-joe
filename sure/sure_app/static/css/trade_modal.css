@@ -17,8 +17,8 @@
     transform: translate(-50%, -50%); 
     background-color: white; 
     padding: 1rem 1.5rem; 
-    width: 500px; 
-    height: 350px; 
+    width: 350px; 
+    height: 300px; 
     border-radius: 0.5rem; 
 } 
 
@@ -50,6 +50,7 @@ h3 {
     flex-direction: column;
     margin:auto;
     width: 70%;
+    margin-top: 50px;
 }
 
 #submit {

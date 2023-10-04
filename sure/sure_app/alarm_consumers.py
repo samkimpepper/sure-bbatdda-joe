@@ -45,10 +45,12 @@ class AlarmConsumer(AsyncWebsocketConsumer):
         print("receive!!")
         content = event["content"]
         link = event["link"]
+        alarm_id = event["alarm_id"]
 
         await self.send(text_data=json.dumps({
             "content": content,
-            "link": link
+            "link": link,
+            "alarm_id": alarm_id
         }))
 
     async def unread_alarms(self, event):
@@ -61,5 +63,9 @@ class AlarmConsumer(AsyncWebsocketConsumer):
             "alarm_cnt": alarm_cnt,
             "alarms": alarms
         }))
+
+    async def alarm_cnt(self, event):
+
+        await self.send(text_data=json.dumps(event))
 
 
