@@ -70,9 +70,10 @@
               </a>
               <form method="POST" action="{% url 'delete_post' good.id %}">
                 {% csrf_token %}
-                <button class="red delete-button" type="submit">삭제하기</button>
+                <button class="red delete-button" type="submit">
+                  삭제하기
+                </button>
               </form>
-              <button class="orange">채팅보기</button>
             </div>
             {% else %}
             <div class="button-box">
