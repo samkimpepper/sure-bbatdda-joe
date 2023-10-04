@@ -83,9 +83,12 @@
             getCurrentLocation();
           }
 
+        // New function for setting the marker
           function setMarker(position) {
+            // If there is already a marker, remove it
             if (marker) marker.setMap(null);
 
+            // Create a new marker at the specified position
             marker = new kakao.maps.Marker({
               position: position,
               map: map,
