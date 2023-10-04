@@ -178,11 +178,14 @@ def review_detail(request, review_id):
 def trade_retrieve(request, goods_id):
     goods = get_object_or_404(Goods, id=goods_id)
     you = get_object_or_404(User, id=goods.user.id)
-    
+
     context = {
+        'goods_id': goods.id,
         'goods_title': goods.title,
         'goods_img': goods.img.url if goods.img else '',
         'goods_price': goods.price,
+        'goods_status': goods.status,
+        'you_id': you.id,
         'you_username': you.username,
         'you_manner_tmp': you.manner_tmp
     }
