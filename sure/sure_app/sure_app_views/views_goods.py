@@ -91,6 +91,7 @@ def like_post(request, good_id):
 
 
 #거래후기 by 채림
+#거래후기 by 채림
 def trade_review(request):
     if request.method == 'POST':
         data = request.POST
@@ -109,14 +110,15 @@ def trade_review(request):
         content = f"{buyer.username}님이 후기를 보내셨습니다."
         link = "detail/" + str(review.id) + "/"
 
-        Alarm.objects.create(user=seller, content=content, link=link)
+        alarm = Alarm.objects.create(user=seller, content=content, link=link)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"user{seller.id}", {
                 "type": "receive_review",
                 "content": content,
-                "link": link
+                "link": link,
+                "alarm_id": alarm.id
             }
         )
 
