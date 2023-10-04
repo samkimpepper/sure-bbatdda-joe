@@ -8,7 +8,7 @@ def _get_chat_list(me):
     chat_list.update(set(Chat.objects.filter(user1_id = me.id).select_related("user1")))
     chat_list.update(set(Chat.objects.filter(user2_id = me.id).select_related("user2")))
     chat_list = list(chat_list)
-    chat_list.sort(key=lambda x: x.id)
+    chat_list.sort(key=lambda x: -x.id)
     return chat_list
 
 # 각 채팅방의 마지막 메시지를 가져오는 함수
@@ -20,13 +20,18 @@ def _get_last_message_list(chat_list):
         else: last_message_list.append(None)
     return last_message_list
 
+# 각 채팅방의 매물 이미지를 가져오는 함수
+def _get_goods_image_list(chat_list):
+    goods_image_list = []
+    for chat in chat_list:
+        goods_image_list.append(Goods.objects.get(id=chat.goods_id).img.url)
+    return goods_image_list
+
 def chatting(request, goods_id=None, you_id=None):
     me = request.user # 채팅을 시작한 사람 (구매자)
-    print(me)
     chat_list= _get_chat_list(me)
-    print(chat_list)
+    goods_img_list = _get_goods_image_list(chat_list)
     last_message_list = _get_last_message_list(chat_list)
-    print(last_message_list)
     
     # 매물 목록에서 넘어왔다면 
     if goods_id and you_id:
@@ -44,14 +49,14 @@ def chatting(request, goods_id=None, you_id=None):
             "goods_id": goods_id, 
             "me": me,
             "you": you,
-            "chat_and_message_list" : zip(chat_list, last_message_list)
+            "chat_and_message_list" : zip(chat_list, last_message_list, goods_img_list)
         }
     
     # nav 바에서 넘어왔다면
     else:
         context = {
             "me": me,
-            "chat_and_message_list" : zip(chat_list, last_message_list)
+            "chat_and_message_list" : zip(chat_list, last_message_list, goods_img_list)
         }
     
     print(context)
