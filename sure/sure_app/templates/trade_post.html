@@ -29,7 +29,7 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    >
+    />
     <title>중고거래 상세보기</title>
     <style>
       img{
@@ -37,7 +37,7 @@
           filter: brightness(0.3);
         {% endif %}
       }
-      
+
       {% if good.status %}
         img + .overlay-text {
           display: block;
@@ -73,7 +73,9 @@
             {% else %}
             <div class="button-box">
               {# TODO: you_id 동적으로 변경하기 #}
-              <a href="{% url 'chatting_and_chat_id' goods_id=good.id you_id=21 %}">
+              <a
+                href="{% url 'chatting_and_chat_id' goods_id=good.id you_id=21 %}"
+              >
                 <button class="orange" id="start-chat">채팅하기</button>
               </a>
             </div>
@@ -90,17 +92,20 @@
               <p>희망 거래장소 | {{ good.location }}</p>
               <div class="right-side-content flex-box">
                 {% if request.user.is_authenticated %}
-                <form method="POST" action="{% url 'like_post' good.id %}" style="margin-right:10px;">
-                  {% csrf_token %} 
+                <button
+                  class="like-button"
+                  data-post-id="{{ good.id }}"
+                  data-is-liked="{{ user_liked }}"
+                >
                   {% if user_liked %}
-                    <button type="submit"><i class="fas fa-heart"></i> Unlike</button>
-                  {% else %}
-                    <button type="submit"><i class="far fa-heart"></i> Like</button>
-                  {% endif %}
-                </form>
+                  <i class="fas fa-heart"></i> {% else %}
+                  <i class="far fa-heart"></i> {% endif %}
+                </button>
                 {% else %}
                 <a href="{% url 'login' %}">
-                  <button class='like-button'><i class='far fa-heart'></i></button>
+                  <button class="like-button">
+                    <i class="far fa-heart"></i>
+                  </button>
                 </a>
                 {% endif %}
                 <p>조회수 {{ good.view_cnt }}</p>
@@ -112,5 +117,43 @@
       </div>
     </div>
     {% include 'footer.html' %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $(".like-button").on("click", function () {
+          var postId = $(this).data("post-id");
+          var isLiked = $(this).data("is-liked");
+          var likeButton = $(this);
+          $.ajax({
+            url: "{% url 'like_post' good.id %}",
+            method: "POST",
+            data: {
+              csrfmiddlewaretoken: "{{ csrf_token }}",
+              post_id: postId,
+              is_liked: isLiked,
+            },
+            success: function (data) {
+              if (data.is_liked) {
+                likeButton.html('<i class="fas fa-heart"></i>');
+                likeButton.data("is-liked", true);
+                localStorage.setItem("like_" + postId, "true");
+              } else {
+                likeButton.html('<i class="far fa-heart"></i>');
+                likeButton.data("is-liked", false);
+                localStorage.removeItem("like_" + postId);
+              }
+            },
+          });
+        });
+        $(".like-button").each(function () {
+          var postId = $(this).data("post-id");
+          var isLiked = localStorage.getItem("like_" + postId);
+          if (isLiked === "true") {
+            $(this).html('<i class="fas fa-heart"></i>');
+            $(this).data("is-liked", true);
+          }
+        });
+      });
+    </script>
   </body>
 </html>
