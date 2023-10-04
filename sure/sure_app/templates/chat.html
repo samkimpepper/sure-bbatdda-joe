@@ -66,6 +66,9 @@
                     </div>
                     <p class="chat-thumb-text"> {{message.text}}</p>
                   </div>
+                  {% if message.status == False %} 
+                  <div id="is-new" style="background-color:red; border-radius:15px; width:50px; text-align:center; color:white;">new!</div>
+                  {% endif %}
                   <div class="thumbnail-box">
                     <img src="" alt="">
                   </div>
@@ -78,8 +81,22 @@
           <div class="chat-main-container">
             {% if chat_id and you %}
             <div>
-              <div class="contact-info flex-box"> {{you.username}} <div class="temp"> {{you.manner_tmp}} </div> </div>
+              <div class="contact-info flex-box"> 
+                {% if you.username %} 
+                {{you.username}} 
+                {% elif you_username %}
+                {{ you_username }}
+                {% endif %}
+                
+                {% if you.manner_tmp %}
+                <div class="temp"> {{you.manner_tmp}} </div> 
+                {% elif you_manner_tmp %}
+                <div class="temp"> {{you_manner_tmp}} </div> 
+                {% else %}
+                <div class="temp"> 36.5 </div> 
+                {% endif %}
 
+              </div>
               <!--물품정보-->
               <div class="goods-box flex-box between">
                 <div class="flex-box">
@@ -87,8 +104,8 @@
                     <img src="" alt="">
                   </div>
                   <div class="goods-info-box">
-                    <p>LG 양문형 냉장고 778L</p>
-                    <p class="bold">150,000원</p>
+                    <p></p>
+                    <p class="bold"></p>
                   </div>
                 </div>
                 <button>거래완료</button>
@@ -159,6 +176,10 @@
               drawInputForm();
           })
       })
+    }
+
+    function deletIsNew() {
+
     }
 
     function initGoods() {
@@ -270,18 +291,6 @@
       const chatContainer = document.querySelector('.chat-container');
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-
-    
-    // 메시지를 전송하고 inputDom을 지워줍니다. 
-    // document.querySelector('#chat-submit').onclick = function(e) {
-    //   const messageInputDom = document.querySelector('#chat-textarea');
-    //   const message = messageInputDom.value;
-    //   chatSocket.send(JSON.stringify({
-    //     'sender': userId,
-    //     'message': message
-    //   }));
-    //   messageInputDom.value = '';
-    // };
 
     function sendMessage() {
       const messageInputDom = document.querySelector('#chat-textarea');
