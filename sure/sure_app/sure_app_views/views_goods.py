@@ -74,24 +74,39 @@ def write(request, good_id=None):
     
 
 # trade_post 좋아요 버튼 by 진혁
+@login_required
 def like_post(request, good_id):
     if request.user.is_authenticated:
         good = get_object_or_404(Goods, id=good_id)
         user = request.user
 
-        if Like.objects.filter(goods=good, user=user).exists():
-            # 이미 '좋아요'를 눌렀다면 '좋아요' 제거
-            Like.objects.filter(goods=good, user=user).delete()
-        else:
-            # '좋아요' 추가
-            Like.objects.create(goods=good, user=user)
+        if request.method == 'POST':
+            is_liked = request.POST.get('is_liked')
+            if is_liked == 'true':
+                # 이미 '좋아요'를 눌렀다면 '좋아요' 제거
+                Like.objects.filter(goods=good, user=user).delete()
+                is_liked = False
+            else:
+                # '좋아요' 추가
+                Like.objects.create(goods=good, user=user)
+                is_liked = True
 
-        return redirect('trade_post', good_id=good.id)
+            return JsonResponse({'is_liked': is_liked})
     else:
         return redirect('login')
+    
+# 게시글 삭제
+@login_required
+def delete_post(request, good_id):
+    good = get_object_or_404(Goods, id=good_id)
+
+    if request.user == good.user:
+        good.delete()
+        return redirect('trade')
+    else:
+        return redirect('trade_post', good_id=good.id)
 
 
-#거래후기 by 채림
 #거래후기 by 채림
 def trade_review(request):
     if request.method == 'POST':

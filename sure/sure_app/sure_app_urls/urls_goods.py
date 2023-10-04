@@ -14,4 +14,5 @@ urlpatterns = [
     path('like/<int:good_id>/', views_goods.like_post, name='like_post'),#좋아요 기능
     path('trade/review/detail/<int:review_id>/', views_goods.review_detail, name='review-detail'), #후기 상세
     path('trade_post/retrieve/<int:goods_id>/', views_goods.trade_retrieve, name='trade_retrieve'), # goods_id에 해당하는 매물 정보 가져오기
+    path('delete/<int:good_id>/', views_goods.delete_post, name='delete_post'),#게시글 삭제
 ]
