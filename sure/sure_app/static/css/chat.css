@@ -25,7 +25,7 @@ h3{
 .post-box img{
     width: 100%;
     height: 380px;
-    object-fit: contain;
+    object-fit: cover;
     background-color: #dedede;
     border-radius: 12px;
 }
@@ -141,7 +141,7 @@ hr{
 }
 
 .chat-box img{
-    height: auto;
+    height: 100%;
 }
 
 .thumbnail-box{
@@ -149,6 +149,14 @@ hr{
     height: 48px;
     background-color:#818181;
     border-radius: 8px;
+}
+
+.is-new{
+    background-color :red; 
+    border-radius: 15px; 
+    width: 50px; 
+    text-align: center; 
+    color: white;
 }
 
 /* 채팅창 */
