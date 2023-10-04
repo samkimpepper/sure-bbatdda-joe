@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate
 from ..forms import LoginForm, RegistrationForm
 from django.contrib.auth.models import User
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -40,7 +40,7 @@ def register(request):
 
 
 # 로그인
-def login(request):
+def login_Form(request):
     # 이미 로그인한 경우
     if request.user.is_authenticated:
         return redirect('main')
@@ -59,7 +59,7 @@ def login(request):
 
                 # 로그인이 성공한 경우
                 if user is not None:
-                    auth_login(request, user) # 로그인 처리 및 세션에 사용자 정보 저장
+                    login(request, user) # 로그인 처리 및 세션에 사용자 정보 저장
                     return redirect('main')  # 리다이렉션
         return render(request, 'login.html', {'form': form}) #폼을 템플릿으로 전달
 

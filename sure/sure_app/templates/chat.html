@@ -12,6 +12,9 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
+    <script type="text/javascript" src="{% static 'js/trade_modal.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/trade_modal.css' %}"/>
     <title>채팅하기</title>
   </head>
 
@@ -52,8 +55,8 @@
 
               <!-- 채팅방리스트 -->
               {# TODO: 채팅 리스트 불러오기#} 
-              {% for chat, message in chat_and_message_list %}
-                <div class="flex-box chat-box between" onclick='connectNewWebsocket({{chat.id}}, {{chat.goods_id}})'>
+              {% for chat, message, img_url in chat_and_message_list %}
+                <div class="flex-box chat-box between" onclick='connectNewWebsocket({{chat.id}}, {{chat.goods_id}}); deleteIsNew(event)'>
                   <div>
                     <div class="flex-box">
                       <p class="bold">
@@ -67,10 +70,10 @@
                     <p class="chat-thumb-text"> {{message.text}}</p>
                   </div>
                   {% if message.status == False %} 
-                  <div id="is-new" style="background-color:red; border-radius:15px; width:50px; text-align:center; color:white;">new!</div>
+                  <div class="is-new">new!</div>
                   {% endif %}
                   <div class="thumbnail-box">
-                    <img src="" alt="">
+                    <img src="{{img_url}}" alt="">
                   </div>
                 </div>
               {% endfor %}
@@ -143,17 +146,6 @@
     let chatSocket = null;
     let GET_MESSAGE_URI = null;
     const userId = {{request.user.id}}; 
-    
-    {% if chat_id and you %}
-    // 매물에서 넘어온 경우
-    const chatId = {{ chat_id }}; 
-    const youId = {{ you.id }};
-    connectNewWebsocket(chatId);
-    {% else %}
-    // nav에서 넘어온 경우
-    const chatId = null; 
-    const youId = null;
-    {% endif %}
 
     // chatId에 해당하는 채팅방과 웹소켓을 연결합니다.
     async function connectNewWebsocket(chatId, goodsId) {
@@ -178,8 +170,9 @@
       })
     }
 
-    function deletIsNew() {
-
+    function deleteIsNew(e){
+      const isNew = $(e.target).find(".is-new");
+      isNew.remove();
     }
 
     function initGoods() {
@@ -315,5 +308,10 @@
       e.preventDefault();
     });
 
+  
+    // 채팅목록 클릭시 배경이 변하게 합니다.
+    // $('.chat-box').click(function(event) {
+    //   $(this).css('background-color', 'gray');
+    // });
   </script>
 </html>
