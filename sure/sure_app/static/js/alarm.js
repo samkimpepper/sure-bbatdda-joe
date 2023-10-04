@@ -13,12 +13,17 @@ $(document).ready(function() {
         console.log('서버로부터 데이터 수신:', data);
         console.log(data.type);
 
+        if(data.alarm_cnt > 0) {
+            document.querySelector('.no-alarm').remove();
+        }
+
         if(data.type == "unread_alarms") {
             console.log("unread_alarms");
             $('.alarm_cnt').textContent = data.alarm_cnt;
             console.log(document.getElementById('alarmCnt'));
             console.log($('.alarm_cnt').textContent);
             document.getElementById('alarmCnt').textContent = data.alarm_cnt;
+            
             var dropdown = document.querySelector(".dropdown-ul");
             for(let i=0; i<data.alarm_cnt; i++) {
                 var li = document.createElement('li');
