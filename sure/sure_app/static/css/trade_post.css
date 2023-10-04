@@ -109,3 +109,15 @@ hr{
     z-index: 1;
     display: none;
   }
+  .delete-button {
+    background-color: #000;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+}
+
+.delete-button:hover {
+    background-color: #000;
+}

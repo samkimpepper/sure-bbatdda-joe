@@ -131,6 +131,11 @@
         </div>
     </div>
     {% include 'footer.html' %}
+    {% if success_message %}
+    <script>
+        alert('{{ success_message }}');
+    </script>
+    {% endif %}
 
 </body>
 
