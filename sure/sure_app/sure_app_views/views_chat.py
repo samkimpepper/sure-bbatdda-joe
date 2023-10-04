@@ -42,11 +42,12 @@ def chatting(request, goods_id=None, you_id=None):
             goods=goods,
             user1=me,
             user2=you
-        )
+        )[0]
         
+        print(new_chat)
         context = {
-            "chat_id": new_chat[0].id, 
-            "goods_id": goods_id, 
+            "chat": new_chat, 
+            "goods": goods, 
             "me": me,
             "you": you,
             "chat_and_message_list" : zip(chat_list, last_message_list, goods_img_list)

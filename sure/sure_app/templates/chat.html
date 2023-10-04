@@ -12,8 +12,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
-    <script type="text/javascript" src="{% static 'js/trade_modal.js' %}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/trade_modal.css' %}"/>
     <title>채팅하기</title>
   </head>
@@ -34,7 +32,7 @@
                 <div>
                   <label>
                     안읽은 메세지만 보기
-                    <input type="checkbox" name="" id="">
+                    <input type="checkbox" name="" id="get-is-new" onclick='drawIsNewMessages()'>
                   </label>
                 </div>
               </div>
@@ -56,7 +54,7 @@
               <!-- 채팅방리스트 -->
               {# TODO: 채팅 리스트 불러오기#} 
               {% for chat, message, img_url in chat_and_message_list %}
-                <div class="flex-box chat-box between" onclick='connectNewWebsocket({{chat.id}}, {{chat.goods_id}}); deleteIsNew(event)'>
+                <div class="flex-box chat-box between" onclick='connectNewWebsocket({{chat.id}}, {{chat.goods_id}}); deleteIsNew(this); colorOnlyThisElem(this);'>
                   <div>
                     <div class="flex-box">
                       <p class="bold">
@@ -82,7 +80,7 @@
 
           <!-- 채팅창-->
           <div class="chat-main-container">
-            {% if chat_id and you %}
+            {% if chat and you %}
             <div>
               <div class="contact-info flex-box"> 
                 {% if you.username %} 
@@ -128,24 +126,37 @@
                 <div style="display: flex; justify-content: center;align-items: center;">채팅을 시작해보세요!</div>
               </div>
             </div>
-            {% endif %}
-
-            <form class="chat-input" onsubmit="return false;">
-              <textarea name="" id="chat-textarea" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
-              <div> <button id="chat-submit">전송</button> </div>
-            </form>
+            {% endif %} 
           </div>
         </div>
       </div>
     </div>
+    
+    <div class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3 id="modal-h3">{{you.username}}님과 {{goods.title}}을 거래하셨나요?</h3>
+        <div class="button-container">
+          <button id="submit">예, 거래했어요.</button>
+          <button id="cancel">취소</button>
+        </div>
+      </div>
+    </div>
+    
     {% include 'footer.html' %}
 
   </body>
+  <script type="text/javascript" src="{% static 'js/trade_modal.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
   <script>
     let chatSocket = null;
     let GET_MESSAGE_URI = null;
     const userId = {{request.user.id}}; 
+    
+    {% if goods and chat %}
+    connectNewWebsocket({{chat.id}}, {{goods.id}});
+    {% endif %}
 
     // chatId에 해당하는 채팅방과 웹소켓을 연결합니다.
     async function connectNewWebsocket(chatId, goodsId) {
@@ -171,8 +182,8 @@
     }
 
     function deleteIsNew(e){
-      const isNew = $(e.target).find(".is-new");
-      isNew.remove();
+      const isNew = e.querySelector('.is-new');
+      if ( isNew ) { isNew.remove(); }
     }
 
     function initGoods() {
@@ -181,6 +192,14 @@
           const result = await response.json();
           const chatMainContainer = document.querySelector('.chat-main-container');
           chatMainContainer.innerHTML = '';
+          
+          let buttonHTML = '';
+          if (result.goods_status == true ) { // 팔린 경우
+            buttonHTML = `<button class="trade-complete" id='trade-complete'>거래완료</button>`;
+          } else{
+            buttonHTML = `<button class="trade-not-complete" id='trade-complete' onclick='toggleModal(${result.you_id}, ${result.goods_id})'>거래완료하기</button>`
+          }
+
           const html = `
           <div>
           <div class="contact-info flex-box"> ${result.you_username} <div class="temp"> ${result.you_manner_tmp} </div> </div>
@@ -194,13 +213,14 @@
                   <p class="bold">${result.goods_price}원</p>
               </div>
               </div>
-              <button>거래완료</button>
+              ${buttonHTML}
           </div>
           <div class="chat-container">
           </div>
           </div>
           `;
           chatMainContainer.insertAdjacentHTML('afterbegin', html);
+          updateModal(result);
           resolve();
       });
     }
@@ -233,6 +253,11 @@
       });
     }
 
+    function updateModal(result) {
+      const modalH3 = document.querySelector("#modal-h3");
+      modalH3.innerHTML = `${result.you_username}님과 ${result.goods_title}을 거래하셨나요?`;
+    }
+
     function drawInputForm(){
       const chatMainContainer = document.querySelector('.chat-main-container');
       const html = `
@@ -243,6 +268,7 @@
       `;
       chatMainContainer.insertAdjacentHTML('beforeend', html);
     }
+
     
     // 내 메시지에 해당하는 html을 넘겨줍니다.
     function getFromMeHtml(message, sendDate) {
@@ -279,7 +305,7 @@
       chatContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    // 스크롤를 맨 아래로 내려주는 함수입니다.
+    // 스크롤을 맨 아래로 내려주는 함수입니다.
     function moveScrollToBottom() {
       const chatContainer = document.querySelector('.chat-container');
       chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -308,10 +334,32 @@
       e.preventDefault();
     });
 
-  
-    // 채팅목록 클릭시 배경이 변하게 합니다.
-    // $('.chat-box').click(function(event) {
-    //   $(this).css('background-color', 'gray');
-    // });
+    function drawIsNewMessages() {
+      const checkbox = document.querySelector('#get-is-new');
+      const isChecked = checkbox.checked;
+      const chattingRoomList = document.querySelectorAll(".flex-box.chat-box.between");
+      
+      if (isChecked) {
+        for (let chattingRoom of chattingRoomList) {
+          let isNew = chattingRoom.querySelector('.is-new');
+          if (isNew == null) {
+            chattingRoom.classList.add('hidden');
+          }
+        }
+      }
+      else {
+        for (let chattingRoom of chattingRoomList) {
+          chattingRoom.classList.remove('hidden');
+        }
+      }  
+    }
+
+    function colorOnlyThisElem(e) {
+      const chattingRoomList = document.querySelectorAll(".flex-box.chat-box.between");
+      for (let chattingRoom of chattingRoomList) {
+        chattingRoom.classList.remove('is-clicked'); 
+      }
+      e.classList.add('is-clicked');
+    }
   </script>
 </html>
