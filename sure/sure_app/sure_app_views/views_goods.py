@@ -10,6 +10,7 @@ from channels.layers import get_channel_layer
 from django.http import JsonResponse
 
 #인기 매물 페이지 by 준경
+@login_required
 def trade(request):
     goods = Goods.objects.order_by('status', '-view_cnt')
     print(goods)
