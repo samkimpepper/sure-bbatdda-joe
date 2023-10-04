@@ -94,3 +94,23 @@ input{
     border-radius: 15px;
     display: inline-block;
 }
+
+.dropdown-ul {
+    max-height: 160px;
+    overflow-y: auto;
+    
+}
+
+.dropdown-ul li {
+    padding: 8px;
+}
+
+.dropdown-ul::-webkit-scrollbar {
+    width: 8px; /* 스크롤바 너비 */
+  }
+  
+.dropdown-ul::-webkit-scrollbar-thumb {
+background-color: #888; /* 스크롤바 색상 */
+border-radius: 4px; /* 스크롤바 모양 지정 (선택사항) */
+}
+

@@ -25,7 +25,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         # 캐시에서 삭제
         user_id = User.objects.get(id=self.scope["user"].id).id
-        self.remove_user_from_cache(str(user_id), self.room_name)
+        self.remove_user_from_cache(self.room_name, str(user_id))
 
 
     # Receive message from WebSocket
@@ -84,7 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         connected_users_key = f'connected_users_{room_id}'
         connected_users = cache.get(connected_users_key, set())
         connected_users.discard(user_id)
-        print(f'Remove users for room {room_id} after fetching: {connected_users}' )
+        print(f'Remove users for room {room_id} after fetching: {connected_users}')
         cache.set(f'connected_users_{room_id}', connected_users)
 
 

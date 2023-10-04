@@ -156,3 +156,9 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = 'true'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 로그인 성공후 이동하는 URL
+LOGIN_REDIRECT_URL = 'main'
+
+# 로그아웃시 이동하는 URL
+LOGOUT_REDIRECT_URL = 'main'

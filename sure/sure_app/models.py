@@ -25,6 +25,8 @@ class Goods(models.Model):
     chat_cnt = models.IntegerField(default=0)
     uploaded_date = models.DateTimeField(auto_now_add=True)
     view_cnt = models.IntegerField(default=0) #조회수 컬럼 추가 by 오준경
+    def __str__(self):
+        return self.title
 
 class Like(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE, related_name='likes')
