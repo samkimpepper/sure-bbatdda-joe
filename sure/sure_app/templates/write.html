@@ -16,11 +16,10 @@
   {% include 'nav.html' %}
   <div class="content-box">
     <div class="container">
-
       {% block content %}
       <div class="about-trade">
         <div class="container">
-          <form class="write-box" method="POST" action="{% url 'write' %}" enctype="multipart/form-data">
+          <form class="write-box" method="POST" action="{% if form.instance.pk %}{% url 'edit' form.instance.pk %}{% else %}{% url 'write' %}{% endif %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="flex-box">
               <label class="img-upload">
@@ -62,8 +61,8 @@
         function previewImage(event) {
           var reader = new FileReader();
           reader.onload = function() {
-              var output = document.getElementById('imagePreview');
-              output.src = reader.result;
+            var output = document.getElementById('imagePreview');
+            output.src = reader.result;
           };
           reader.readAsDataURL(event.target.files[0]);
         }
@@ -71,31 +70,53 @@
           var marker;
 
           function initMap() {
-              var container = document.getElementById('map');
-              var options = {
-                  center: new kakao.maps.LatLng(37.5665, 126.9780),
-                  level: 3
-              };
+            var container = document.getElementById('map');
+            var options = {
+              center: new kakao.maps.LatLng(37.5665, 126.9780),
+              level: 3 };
+            map = new kakao.maps.Map(container, options);
 
-              map = new kakao.maps.Map(container, options);
+            kakao.maps.event.addListener(map, 'click', function(mouseEvent) {        
+              setMarker(mouseEvent.latLng);
+             });
 
-              // 페이지 로딩 시 현재 위치 가져오기
-              getCurrentLocation();
+            getCurrentLocation();
+          }
+
+          function setMarker(position) {
+            if (marker) marker.setMap(null);
+
+            marker = new kakao.maps.Marker({
+              position: position,
+              map: map,
+              title : "선택 위치"
+            });
+
+            const locationInputField=document.getElementById('location');
+            
+            const geocoder= new kakao.maps.services.Geocoder();
+            
+            geocoder.coord2Address(position.getLng(),position.getLat(),function(result,status){
+              if(status===kakao.maps.services.Status.OK){
+                locationInputField.value=result[0].address.address_name;
+              }
+              
+              });
           }
 
           function getCurrentLocation() {
               if ("geolocation" in navigator) {
-                  navigator.geolocation.getCurrentPosition(function(position) {
-                      var latitude = position.coords.latitude;
-                      var longitude = position.coords.longitude;
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
 
                       // 위경도로 지도 이동 및 마커 생성
-                      setMapToCurrentLocation(latitude, longitude);
+                    setMapToCurrentLocation(latitude, longitude);
                   }, function(error) {
                       console.error("Error getting location: " + error.message);
                   });
               } else {
-                  console.error("Geolocation is not supported by your browser.");
+                console.error("Geolocation is not supported by your browser.");
               }
           }
 
@@ -120,39 +141,37 @@
         window.onload = initMap;
 
         document.getElementById('search-button').addEventListener('click', function(e) {
-            e.preventDefault(); 
-
-            const geocoder = new kakao.maps.services.Geocoder();
-            const searchLocationInputValue = document.getElementById('search-location').value;
-
-            geocoder.addressSearch(searchLocationInputValue, (result, status) => {
-
-                if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
-
-                    const coordsLatLangObject= new kakao.maps.LatLng(result[0].y,result[0].x);
-
-                    // 지도 중심을 검색된 장소로 이동합니다
-                    map.setCenter(coordsLatLangObject);
-
-                    if(marker){
-                        marker.setPosition(coordsLatLangObject)
-                    }else{
-                        marker= new google.maps.Marker({
-                            position : coordsLatLangObject,
-                            map :map,
-                            title : result[0].place_name 
-                        })
-                    }
-
-                    // 위치 정보 저장 
-                    const locationInputField=document.getElementById('location');
-                    locationInputField.value=result[0].y+','+result[0].x;
-                }else{
-                  alert("검색 결과가 없습니다.");
-                }
-            });
+          e.preventDefault(); 
+      
+          const geocoder = new kakao.maps.services.Geocoder();
+          const searchLocationInputValue = document.getElementById('search-location').value;
+      
+          geocoder.addressSearch(searchLocationInputValue, (result, status) => {
+              if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
+                  const coordsLatLangObject= new kakao.maps.LatLng(result[0].y,result[0].x);
+      
+                  map.setCenter(coordsLatLangObject);
+      
+                  if(marker){
+                    marker.setPosition(coordsLatLangObject)
+                  }else{
+                    marker= new kakao.maps.Marker({
+                      position : coordsLatLangObject,
+                      map :map,
+                      title : result[0].place_name 
+                    })
+                  }
+                  const locationInputField=document.getElementById('location');
+                   geocoder.coord2Address(result[0].x, result[0].y, function(result, status) {
+                       if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
+                        locationInputField.value=result[0].address.address_name;
+                       }
+                   });
+              }else{
+                alert("검색 결과가 없습니다.");
+              }
+          });
         });
       </script>
     </body>
-
 </html>
