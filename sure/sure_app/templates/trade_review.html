@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/trade_review.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}?{% now "U" %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/trade_modal.css' %}"/>
     <title>거래 리뷰</title>
@@ -78,23 +78,35 @@
         </div>
       </div>
     </div>
-
-    <button class="trigger">팝업 띄우기 테스트</button>
-
-    <div class="modal">
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h3>사용자님과 다이슨 청소기 상품을 거래하셨나요?</h3>
-        <div class="button-container">
-          <button id="submit">예, 거래했어요.</button>
-          <button id="cancel">취소</button>
-        </div>
-      </div>
-    </div>
     {% include 'footer.html' %}
 
 
     <script>
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+
+      const goodsId = urlParams.get('goodsId');
+      const sellerId = urlParams.get('sellerId');
+      var sellername;
+
+      console.log('goodsId:', goodsId);
+      console.log('sellerId:', sellerId);
+
+      $.ajax({
+        url: '/goods/trade_post/retrieve/' + goodsId + '/',
+        type: 'GET',
+        success: function(data) {
+          // selected-thumbnail-box의 img와
+          // goods-info-box의 p태그 내용을 data.goods_img, data.title로 바꾸고싶어
+          sellername = data.you_username;
+          document.querySelector('.selected-thumbnail-box img').src = data.goods_img;
+          document.querySelector('.goods-info-box p.bold').textContent = data.goods_title;
+          document.querySelector('.main-title').textContent = sellername + '님에게 감사 인사를 남겨보세요.';
+        }
+
+      });
+
+
       // 초기 선택 없음
       let selectedIcon = null;
     
@@ -147,7 +159,7 @@
           'manner_score': rating,
           'content': content,
           'buyer': user_id,
-          'seller': 26
+          'seller': sellerId
         };
 
         $.ajax({
