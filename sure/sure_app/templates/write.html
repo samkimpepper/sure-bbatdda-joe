@@ -16,11 +16,10 @@
   {% include 'nav.html' %}
   <div class="content-box">
     <div class="container">
-
       {% block content %}
       <div class="about-trade">
         <div class="container">
-          <form class="write-box" method="POST" action="{% url 'write' %}" enctype="multipart/form-data">
+          <form class="write-box" method="POST" action="{% if form.instance.pk %}{% url 'edit' form.instance.pk %}{% else %}{% url 'write' %}{% endif %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="flex-box">
               <label class="img-upload">
@@ -120,39 +119,45 @@
         window.onload = initMap;
 
         document.getElementById('search-button').addEventListener('click', function(e) {
-            e.preventDefault(); 
-
-            const geocoder = new kakao.maps.services.Geocoder();
-            const searchLocationInputValue = document.getElementById('search-location').value;
-
-            geocoder.addressSearch(searchLocationInputValue, (result, status) => {
-
-                if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
-
-                    const coordsLatLangObject= new kakao.maps.LatLng(result[0].y,result[0].x);
-
-                    // 지도 중심을 검색된 장소로 이동합니다
-                    map.setCenter(coordsLatLangObject);
-
-                    if(marker){
-                        marker.setPosition(coordsLatLangObject)
-                    }else{
-                        marker= new google.maps.Marker({
-                            position : coordsLatLangObject,
-                            map :map,
-                            title : result[0].place_name 
-                        })
-                    }
-
-                    // 위치 정보 저장 
-                    const locationInputField=document.getElementById('location');
-                    locationInputField.value=result[0].y+','+result[0].x;
-                }else{
-                  alert("검색 결과가 없습니다.");
-                }
-            });
-        });
+          e.preventDefault(); 
+      
+          const geocoder = new kakao.maps.services.Geocoder();
+          const searchLocationInputValue = document.getElementById('search-location').value;
+      
+          geocoder.addressSearch(searchLocationInputValue, (result, status) => {
+      
+              if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
+      
+                  const coordsLatLangObject= new kakao.maps.LatLng(result[0].y,result[0].x);
+      
+                  // 지도 중심을 검색된 장소로 이동합니다
+                  map.setCenter(coordsLatLangObject);
+      
+                  if(marker){
+                    marker.setPosition(coordsLatLangObject)
+                  }else{
+                    marker= new kakao.maps.Marker({
+                      position : coordsLatLangObject,
+                      map :map,
+                      title : result[0].place_name 
+                    })
+                  }
+                  
+                  // 위치 정보 저장 
+                  const locationInputField=document.getElementById('location');
+                  
+                   // 위도, 경도로부터 주소 정보 가져오기
+                   geocoder.coord2Address(result[0].x, result[0].y, function(result, status) {
+                       if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
+                           locationInputField.value=result[0].address.address_name;
+                       }
+                   });
+                   
+              }else{
+                alert("검색 결과가 없습니다.");
+              }
+          });
+        });      
       </script>
     </body>
-
 </html>
