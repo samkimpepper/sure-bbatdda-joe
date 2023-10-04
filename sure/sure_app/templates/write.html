@@ -38,19 +38,21 @@
             </div>
             <div class="full-box">
               <label for="description" class="block-box">물품 설명</label>
-              <textarea name="description" required="required">{% if Goods %}{{ Goods.content }}{% endif %}</textarea>
+              <textarea name="content" required="required">{% if Goods %}{{ Goods.content }}{% endif %}</textarea>
+              <div class="full-box">
+                <label for="location" class="block-box">거래 희망 장소</label>
+                <input type="text" id="search-location" name="location" placeholder="거래를 희망하는 장소" required="required" value="{% if Goods %}{{ Goods.location }}{% endif %}">
+                <button id="search-button">검색</button>
+              </div>
+              <div id="map" style="width: 100%; height: 468px; margin-top: 44px"></div>
+              <div id="current-location">
+                <p id="current-location-info"></p>
+              </div>
+              <input type="hidden" id="location" name="location" value="{% if Goods %}{{ Goods.location }}{% endif %}">
+              <div class="submit-button-box">
+                <button type="submit">{% if form.instance.pk %}수정하기{% else %}전송{% endif %}</button> <!-- pk가 있으면 '수정하기', 없으면 '전송' -->
+              </div>
             </div>
-            <div class="full-box">
-              <label for="location" class="block-box">거래 희망 장소</label>
-              <input type="text" name="location" placeholder="거래를 희망하는 장소" required="required" value="{% if Goods %}{{ Goods.location }}{% endif %}">
-            </div>
-            <div id="map" style="width: 100%; height: 400px;"></div>
-            <div id="current-location">
-              <p id="current-location-info"></p>
-            </div>
-            <input type="hidden" id="location" name="location" value="{% if Goods %}{{ Goods.location }}{% endif %}">
-            <div class="submit-button-box">
-              <button type="submit">{% if form.instance.pk %}수정하기{% else %}전송{% endif %}</button> <!-- pk가 있으면 '수정하기', 없으면 '전송' -->
           </form>
         </div>
       </div>
@@ -58,69 +60,99 @@
       <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=06b71a5db40aca812f7ae8bff82d58b9&libraries=services"></script>
       <script>
         function previewImage(event) {
-          var imagePreview = document.getElementById('imagePreview');
-          var input = event.target;
-
           var reader = new FileReader();
           reader.onload = function() {
-            imagePreview.src = reader.result;
+              var output = document.getElementById('imagePreview');
+              output.src = reader.result;
           };
-          reader.readAsDataURL(input.files[0]);
+          reader.readAsDataURL(event.target.files[0]);
         }
+          var map;
+          var marker;
 
-        var container = document.getElementById('map');
-        var options = {
-          center: new kakao.maps.LatLng(37.5665, 126.9780),
-          level: 13
-        };
+          function initMap() {
+              var container = document.getElementById('map');
+              var options = {
+                  center: new kakao.maps.LatLng(37.5665, 126.9780),
+                  level: 3
+              };
 
-        var map = new kakao.maps.Map(container, options);
+              map = new kakao.maps.Map(container, options);
 
-        var marker;
-
-        kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-          var latlng = mouseEvent.latLng;
-
-          if (marker) {
-            marker.setMap(null);
+              // 페이지 로딩 시 현재 위치 가져오기
+              getCurrentLocation();
           }
 
-          marker = new kakao.maps.Marker({
-            position: latlng
-          });
+          function getCurrentLocation() {
+              if ("geolocation" in navigator) {
+                  navigator.geolocation.getCurrentPosition(function(position) {
+                      var latitude = position.coords.latitude;
+                      var longitude = position.coords.longitude;
 
-          marker.setMap(map);
+                      // 위경도로 지도 이동 및 마커 생성
+                      setMapToCurrentLocation(latitude, longitude);
+                  }, function(error) {
+                      console.error("Error getting location: " + error.message);
+                  });
+              } else {
+                  console.error("Geolocation is not supported by your browser.");
+              }
+          }
 
-          var locationInput = document.getElementById('location');
-          locationInput.value = latlng.getLat() + ',' + latlng.getLng();
-        });
+          function setMapToCurrentLocation(latitude, longitude) {
+            // 위치 정보 저장 
+            const locationInput = document.getElementById('location');
+            locationInput.value = latitude + ',' + longitude;
+            
+            const latlng = new kakao.maps.LatLng(latitude, longitude);
 
-
-        // 현재 위치 가져오기 수정
-        function getCurrentLocation() {
-          if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-              var latitude = position.coords.latitude;
-              var longitude = position.coords.longitude;
-
-              // 위치 정보를 표시할 엘리먼트에 내용 업데이트
-              var locationInfo = document.getElementById('current-location-info');
-              locationInfo.textContent = "위도: " + latitude + ", 경도: " + longitude;
-
-              // 위경도로 지도 이동 및 마커 생성
-              setMapToCurrentLocation(latitude, longitude);
-
-            }, function(error) {
-              console.error("Error getting location: " + error.message);
+            if (marker) marker.setMap(null);
+            
+            marker = new kakao.maps.Marker({
+                position: latlng,
+                map: map,
+                title : "현재 위치"
             });
-          } else {
-            console.error("Geolocation is not supported by your browser.");
-          }
+
+            map.setCenter(latlng);
         }
 
-        // 페이지 로딩 시 현재 위치 가져오기
-        getCurrentLocation();
+        window.onload = initMap;
+
+        document.getElementById('search-button').addEventListener('click', function(e) {
+            e.preventDefault(); 
+
+            const geocoder = new kakao.maps.services.Geocoder();
+            const searchLocationInputValue = document.getElementById('search-location').value;
+
+            geocoder.addressSearch(searchLocationInputValue, (result, status) => {
+
+                if (status === kakao.maps.services.Status.OK && result.length > 0 ) {
+
+                    const coordsLatLangObject= new kakao.maps.LatLng(result[0].y,result[0].x);
+
+                    // 지도 중심을 검색된 장소로 이동합니다
+                    map.setCenter(coordsLatLangObject);
+
+                    if(marker){
+                        marker.setPosition(coordsLatLangObject)
+                    }else{
+                        marker= new google.maps.Marker({
+                            position : coordsLatLangObject,
+                            map :map,
+                            title : result[0].place_name 
+                        })
+                    }
+
+                    // 위치 정보 저장 
+                    const locationInputField=document.getElementById('location');
+                    locationInputField.value=result[0].y+','+result[0].x;
+                }else{
+                  alert("검색 결과가 없습니다.");
+                }
+            });
+        });
       </script>
-</body>
+    </body>
 
 </html>

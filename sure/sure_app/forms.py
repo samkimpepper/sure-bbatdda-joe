@@ -33,6 +33,9 @@ class RegistrationForm(forms.Form):
 
 # 게시물
 class GoodsForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea)  
+    location = forms.CharField(max_length=100)
+
     class Meta:
         model = Goods
-        fields = ['title', 'content', 'price', 'location', 'img']
+        fields = ['title', 'description', 'price', 'location', 'img']

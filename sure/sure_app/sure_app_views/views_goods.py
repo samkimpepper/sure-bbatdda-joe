@@ -11,7 +11,7 @@ from django.http import JsonResponse
 
 #인기 매물 페이지 by 준경
 def trade(request):
-    goods = Goods.objects.filter(status=False).order_by('-view_cnt')
+    goods = Goods.objects.order_by('status', '-view_cnt')
     print(goods)
     return render(request, 'trade.html', {'goods': goods})
 
@@ -22,10 +22,8 @@ def search(request):
         Q(title__icontains=keyword)     |
         Q(content__icontains=keyword)   |
         Q(location__icontains=keyword)  |
-        Q(price__icontains=keyword),
-        status=False        
-          # 데이터베이스에서 검색
-    ).distinct().order_by('-view_cnt','-like_cnt','-chat_cnt')
+        Q(price__icontains=keyword)      # 데이터베이스에서 검색
+    ).distinct().order_by('status','-view_cnt','-like_cnt','-chat_cnt')
     return render(request, 'search.html', {'results': results, 'search': keyword})
 
 
@@ -50,27 +48,27 @@ def trade_post(request, good_id):
 #@login_required
 def write(request, good_id=None):
     if request.method == "POST":
-        if good_id:  
+        if good_id:
             goods = get_object_or_404(Goods, id=good_id)
-            form = GoodsForm(request.POST or None, request.FILES or None, instance=goods)
-        else:  
-            form = GoodsForm(request.POST or None, request.FILES or None)
+            form = GoodsForm(request.POST, request.FILES, instance=goods)
+        else:
+            form = GoodsForm(request.POST, request.FILES)
 
         if form.is_valid():
             goods = form.save(commit=False)
             goods.user = request.user
             goods.save()
             
-            return redirect('trade_post', good_id=goods.id) 
+            return redirect('trade_post', good_id=goods.id)
 
-    else:  
+    else:
         if good_id:
             goods = get_object_or_404(Goods, id=good_id)
             form = GoodsForm(instance=goods)
         else:
             form = GoodsForm()
 
-    return render(request,'write.html',{'form':form})
+    return render(request, 'write.html', {'form': form})
     
 
 # trade_post 좋아요 버튼 by 진혁
