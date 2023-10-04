@@ -8,6 +8,7 @@ from ..models import Like
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
+from decimal import Decimal
 
 #인기 매물 페이지 by 준경
 @login_required
@@ -106,6 +107,14 @@ def delete_post(request, good_id):
     else:
         return redirect('trade_post', good_id=good.id)
 
+# 거래 완료 by 채림
+def complete_trade(request, goods_id):
+    if request.method == 'POST':
+        goods = get_object_or_404(Goods, id=goods_id)
+        goods.status = True 
+        goods.save()
+
+        return JsonResponse({'msg': '거래 완료'}, status=200)
 
 #거래후기 by 채림
 def trade_review(request):
@@ -122,6 +131,15 @@ def trade_review(request):
             manner_score=data.get('manner_score'),
             content=data.get('content')
         )
+
+        if review.manner_score == 3:
+            seller.manner_tmp += 1
+        elif review.manner_score == 2:
+            seller.manner_tmp += Decimal(0.5) 
+        else:
+            seller.manner_tmp -= Decimal(0.5)
+            print(seller.manner_tmp)
+        seller.save()
 
         content = f"{buyer.username}님이 후기를 보내셨습니다."
         link = "detail/" + str(review.id) + "/"

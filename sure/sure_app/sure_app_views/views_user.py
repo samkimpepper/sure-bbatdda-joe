@@ -75,13 +75,9 @@ def login_Form(request):
 # 동네인증
 @login_required
 def location_auth(request):
-    try:
-        user_profile = User.objects.get(username=request.user)
-        location = user_profile.location
-    except User.DoesNotExist:
-        location = None
 
-    return render(request, 'location.html', {'location': location})
+    location = request.user.location
+    return render(request, "location.html", {"location": location})
 
 # 지역설정
 @login_required
@@ -91,9 +87,9 @@ def set_location(request):
 
         if location:
             try:
-                user_profile, created = User.objects.get_or_create(user=request.user)
-                user_profile.location = location
-                user_profile.save()
+                user_tmp, created = User.objects.get_or_create(user=request.user)
+                user_tmp.location = location
+                user_tmp.save()
 
                 return redirect('location')
             except Exception as e:
@@ -102,6 +98,7 @@ def set_location(request):
             return JsonResponse({"status": "error", "message": "Region cannot be empty"})
     else:
         return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
 
 # 지역인증 완료
 @login_required
