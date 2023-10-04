@@ -31,6 +31,7 @@ def search(request):
 
 
 #매물 상세 페이지 by 준경
+@login_required
 def trade_post(request, good_id):
     good = get_object_or_404(Goods, id=good_id)
 
