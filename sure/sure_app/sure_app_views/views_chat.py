@@ -15,7 +15,7 @@ def _get_chat_list(me):
 def _get_last_message_list(chat_list):
     last_message_list = []
     for chat in chat_list:
-        message_queryset = Message.objects.filter(chat_id=chat.id)
+        message_queryset = Message.objects.filter(chat_id=chat.id).order_by('send_date')
         if message_queryset.exists(): last_message_list.append(list(message_queryset)[-1])
         else: last_message_list.append(None)
     return last_message_list
@@ -50,7 +50,7 @@ def chatting(request, goods_id=None, you_id=None):
     # nav 바에서 넘어왔다면
     else:
         context = {
-            "me_id ": me.id,
+            "me": me,
             "chat_and_message_list" : zip(chat_list, last_message_list)
         }
     
@@ -59,5 +59,12 @@ def chatting(request, goods_id=None, you_id=None):
 
 # 메시지 기록을 불러오는 함수입니다.
 def messages(request, chat_id):
-    messages = list(Message.objects.filter(chat_id=chat_id).values())
-    return JsonResponse(messages, safe=False)
+    messages = Message.objects.filter(chat_id=chat_id).order_by('send_date').values()
+    
+    # 메시지를 불러오면서 읽음 처리
+    for message in list(messages):
+        tmp = Message.objects.get(id=message['id'])
+        tmp.status = True
+        tmp.save()
+
+    return JsonResponse(list(messages), safe=False)
