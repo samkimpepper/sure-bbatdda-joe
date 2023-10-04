@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate
 from ..forms import LoginForm, RegistrationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -7,36 +6,46 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.shortcuts import render
 
 # User model 커스터마이징시 
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-# 회원가입
+
+#회원가입 renewal by 준경
+from django.contrib import messages
+
 def register(request):
     error_message = ''
+    success_message = ''  # 추가: 회원가입 성공 메시지 변수
+
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         username = request.POST.get('username')
+        
         if User.objects.filter(username=username).exists():
             error_message = "이미 존재하는 아이디입니다."
         elif form.is_valid():
-            
             password1 = form.cleaned_data['password1']
             password2 = form.cleaned_data['password2']
             
-            # 비밀번호 일치 여부를 확인
             if password1 == password2:
-                # 새로운 유저를 생성
                 user = User.objects.create_user(username=username, password=password1)
-                messages.success(request, "가입완료")
-                return redirect('login')
+                user = authenticate(request, username=username, password=password1)
+                
+                if user is not None:
+                    login(request, user)
+                    success_message="가입완료" # 회원가입 성공 메시지 설정
+                    return redirect('main')
             else:
                 form.add_error('password2', 'Passwords do not match')
     else:
         form = RegistrationForm()
     
-    return render(request, 'register.html', {'form': form, 'error_message': error_message})
+    return render(request, 'register.html', {'form': form, 'error_message': error_message, 'success_message':success_message })
+
+
 
 
 # 로그인
