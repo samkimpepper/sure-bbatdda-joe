@@ -1,5 +1,4 @@
 var modal = document.querySelector(".modal");
-var trigger = document.querySelector(".trigger");
 var closeButton = document.querySelector(".close-button");
 var submitButton = document.querySelector('#submit');
 var cancelButton = document.querySelector("#cancel");
@@ -11,8 +10,6 @@ function toggleModal(_sellerId, _goodsId) {
     goodsId = _goodsId;
     console.log(goodsId);
     modal.classList.toggle("show-modal");
-
-
 }
 
 function windowOnClick(event) {
@@ -38,7 +35,7 @@ submitButton.addEventListener('click', function () {
     window.location.href = `/goods/trade/review/?goodsId=${goodsId}&sellerId=${sellerId}`;
 });
 
-trigger.addEventListener("click", toggleModal);
+
 closeButton.addEventListener("click", toggleModal);
 cancel.addEventListener("click", toggleModal);
 window.addEventListener("click", windowOnClick);
