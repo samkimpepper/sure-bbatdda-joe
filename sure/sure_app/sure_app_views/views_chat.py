@@ -1,6 +1,16 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from ..models import Chat, User, Message, Goods
+import openai
+import os
+import json
+from pathlib import Path
+
+# Openai API key
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+SECRETS_DIR = BASE_DIR / '.secrets'
+key = json.load(open(os.path.join(SECRETS_DIR, 'key.json')))
+OPENAI_KEY = key['OPENAI_KEY']
 
 # 참여한 모든 채팅방 목록을 가져오는 함수
 def _get_chat_list(me):
@@ -74,3 +84,24 @@ def messages(request, chat_id):
         tmp.save()
 
     return JsonResponse(list(messages), safe=False)
+
+def bot(request):
+    openai.api_key = OPENAI_KEY
+    
+    # 제목 필드값 가져옴
+    prompt = request.POST.get("title")
+    
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+        )
+        # 반환된 응답에서 텍스트 추출해 변수에 저장
+        message = response["choices"][0]["message"]["content"]
+    except Exception as e:
+        message = str(e)
+    
+    return JsonResponse({"message": message})

@@ -29,7 +29,7 @@ SECRET_KEY = secrets['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "corsheaders", 
     "sure_app",
 ]
 
@@ -61,6 +62,7 @@ CHANNEL_LAYERS = {
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -69,6 +71,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# CORS 처리
+CORS_ORIGIN_ALLOW_ALL = True 
 
 ROOT_URLCONF = "sure.urls"
 
@@ -162,3 +167,4 @@ LOGIN_REDIRECT_URL = 'main'
 
 # 로그아웃시 이동하는 URL
 LOGOUT_REDIRECT_URL = 'main'
+
