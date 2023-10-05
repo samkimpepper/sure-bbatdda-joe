@@ -30,7 +30,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=06b71a5db40aca812f7ae8bff82d58b9&libraries=services"></script>
     <title>중고거래 상세보기</title>
+
+    
     <style>
       img{
         {% if good.status %}
@@ -43,6 +46,11 @@
           display: block;
         }
       {% endif %}
+
+      #map {
+        width: 100%;
+        height: 500px;
+    }
     </style>
   </head>
 
@@ -117,6 +125,7 @@
               </div>
             </div>
           </div>
+          <div id="map"></div>
           {% endblock %}
         </div>
       </div>
@@ -157,6 +166,69 @@
             $(this).html('<i class="fas fa-heart"></i>');
             $(this).data("is-liked", true);
           }
+        });
+      });
+    </script>
+
+    <!--내 위치에서 거래희망장소까지 경로 표시 by 준경-->
+    <script>
+      $(document).ready(function () {
+        var myLocationAddress = "{{ user.location }}";
+        var goodsLocationAddress = "{{ good.location }}";
+      
+        // Kakao Maps API 초기화
+        kakao.maps.load(function () {
+          var geocoder = new kakao.maps.services.Geocoder();
+        
+          // 내 위치 주소를 좌표로 변환
+          geocoder.addressSearch(myLocationAddress, function (myLocationResult, status) {
+            if (status === kakao.maps.services.Status.OK) {
+              var myLat = myLocationResult[0].y; // 위도
+              var myLng = myLocationResult[0].x; // 경도
+            
+              // goods.location 주소를 좌표로 변환
+              geocoder.addressSearch(goodsLocationAddress, function (goodsLocationResult, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                  var goodsLat = goodsLocationResult[0].y; // 위도
+                  var goodsLng = goodsLocationResult[0].x; // 경도
+                
+                  // 지도 생성 및 표시할 영역 설정
+                  var container = document.getElementById("map");
+                  var options = {
+                    center: new kakao.maps.LatLng(myLat, myLng), // 내 위치를 중심으로 지도 표시
+                    level: 3, 
+                  };
+                  var map = new kakao.maps.Map(container, options);
+                
+                  // 내 위치와 목적지를 포인터로 표시
+                  var myMarker = new kakao.maps.Marker({
+                    position: new kakao.maps.LatLng(myLat, myLng),
+                    map: map,
+                  });
+                
+                  var goodsMarker = new kakao.maps.Marker({
+                    position: new kakao.maps.LatLng(goodsLat, goodsLng),
+                    map: map,
+                  });
+                
+                  // 이동 경로를 표시할 선 추가
+                  var polyline = new kakao.maps.Polyline({
+                    path: [
+                      new kakao.maps.LatLng(myLat, myLng), // 내 위치
+                      new kakao.maps.LatLng(goodsLat, goodsLng), // 목적지 위치
+                    ],
+                    strokeWeight: 5, // 선 두께
+                    strokeColor: "#FF0000", // 선 색상 (빨간색)
+                    strokeOpacity: 0.7, // 선 투명도
+                    strokeStyle: "solid", // 선 스타일 (실선)
+                  });
+                
+                  // 지도에 이동 경로 추가
+                  polyline.setMap(map);
+                }
+              });
+            }
+          });
         });
       });
     </script>
