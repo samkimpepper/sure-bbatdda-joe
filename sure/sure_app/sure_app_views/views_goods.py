@@ -48,14 +48,17 @@ def trade_post(request, good_id):
 
 
 #글쓰기 페이지 by 진혁
-#@login_required
+@login_required
 def write(request, good_id=None):
+    if good_id:
+        goods = get_object_or_404(Goods, id=good_id)
+        if request.user != goods.user:
+            return redirect('trade_post', good_id=good_id)
+    else:
+        goods = None
+
     if request.method == "POST":
-        if good_id:
-            goods = get_object_or_404(Goods, id=good_id)
-            form = GoodsForm(request.POST, request.FILES, instance=goods)
-        else:
-            form = GoodsForm(request.POST, request.FILES)
+        form = GoodsForm(request.POST, request.FILES, instance=goods)
 
         if form.is_valid():
             goods = form.save(commit=False)
@@ -63,13 +66,8 @@ def write(request, good_id=None):
             goods.save()
             
             return redirect('trade_post', good_id=goods.id)
-
     else:
-        if good_id:
-            goods = get_object_or_404(Goods, id=good_id)
-            form = GoodsForm(instance=goods)
-        else:
-            form = GoodsForm()
+        form = GoodsForm(instance=goods)
 
     return render(request, 'write.html', {'form': form})
     

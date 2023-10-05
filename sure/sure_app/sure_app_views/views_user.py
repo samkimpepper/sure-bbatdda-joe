@@ -87,9 +87,8 @@ def set_location(request):
 
         if location:
             try:
-                user_tmp, created = User.objects.get_or_create(user=request.user)
-                user_tmp.location = location
-                user_tmp.save()
+                request.user.location = location
+                request.user.save()
 
                 return redirect('location')
             except Exception as e:
@@ -104,7 +103,7 @@ def set_location(request):
 @login_required
 def set_location_certification(request):
     if request.method == "POST":
-        request.user.profile.region_certification = 'Y'
-        request.user.profile.save()
+        request.user.location_certification = 'Y'
+        request.user.save()
         messages.success(request, "인증되었습니다")
-        return redirect('location')
+        return redirect('main')
