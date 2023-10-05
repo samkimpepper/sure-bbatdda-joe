@@ -34,42 +34,50 @@ def search(request):
 #매물 상세 페이지 by 준경
 @login_required
 def trade_post(request, good_id):
-    good = get_object_or_404(Goods, id=good_id)
+    user = request.user
+    if user.location_certification =='Y':#동네인증여부에 따른 접근 처리
+        good = get_object_or_404(Goods, id=good_id)
 
-    if request.method == 'POST': 
-        if 'delete-button' in request.POST:
-            good.delete()
-            return redirect('trade')
+        if request.method == 'POST': 
+            if 'delete-button' in request.POST:
+                good.delete()
+                return redirect('trade')
 
-    good.view_cnt += 1 
-    good.save() 
+        good.view_cnt += 1 
+        good.save() 
 
-    return render(request, 'trade_post.html',{ 'good': good})
+        return render(request, 'trade_post.html',{ 'good': good})
+    else:
+        return render(request,'location.html')
 
 
 #글쓰기 페이지 by 진혁
 @login_required
 def write(request, good_id=None):
-    if good_id:
-        goods = get_object_or_404(Goods, id=good_id)
-        if request.user != goods.user:
-            return redirect('trade_post', good_id=good_id)
+    user = request.user
+    if user.location_certification =='Y':#동네인증여부에 따른 접근 처리
+        if good_id:
+            goods = get_object_or_404(Goods, id=good_id)
+            if request.user != goods.user:
+                return redirect('trade_post', good_id=good_id)
+        else:
+            goods = None
+
+        if request.method == "POST":
+            form = GoodsForm(request.POST, request.FILES, instance=goods)
+
+            if form.is_valid():
+                goods = form.save(commit=False)
+                goods.user = request.user
+                goods.save()
+
+                return redirect('trade_post', good_id=goods.id)
+        else:
+            form = GoodsForm(instance=goods)
+
+        return render(request, 'write.html', {'form': form})
     else:
-        goods = None
-
-    if request.method == "POST":
-        form = GoodsForm(request.POST, request.FILES, instance=goods)
-
-        if form.is_valid():
-            goods = form.save(commit=False)
-            goods.user = request.user
-            goods.save()
-            
-            return redirect('trade_post', good_id=goods.id)
-    else:
-        form = GoodsForm(instance=goods)
-
-    return render(request, 'write.html', {'form': form})
+        return render(request,'location.html')
     
 
 # trade_post 좋아요 버튼 by 진혁
