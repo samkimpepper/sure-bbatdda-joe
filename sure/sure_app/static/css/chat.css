@@ -317,6 +317,7 @@ hr{
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 }
 
 
@@ -352,4 +353,8 @@ hr{
 
 #remoteVideo img{
     width: 100%;
+}
+
+.close-button{
+    height:30px
 }
