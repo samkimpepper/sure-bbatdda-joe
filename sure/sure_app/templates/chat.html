@@ -41,13 +41,13 @@
             <!-- 채팅 리스트 -->
             <div class="chat-list-box flex-box column">
               <!-- 봇 -->
-              <div class="chat-box flex-box">
-                <div class="ai-profile">
-                  <img src="{% static 'img/icon_aibot.png'%}" alt="">
-                </div>
+              <div class="chat-box flex-box between" onclick='initChatbot()'>
                 <div>
                   <p class="bold">AI 챗봇</p>
                   <p class="chat-thumb-text">궁금한 내용을 물어보세요!</p>
+                </div>
+                <div class="ai-profile">
+                  <img src="{% static 'img/icon_aibot.png'%}" alt="">
                 </div>
               </div>
 
@@ -67,7 +67,7 @@
                     </div>
                     <p class="chat-thumb-text"> {{message.text}}</p>
                   </div>
-                  {% if message.status == False %} 
+                  {% if message.status == False and message.sender_id != me.id%} 
                   <div class="is-new">new!</div>
                   {% endif %}
                   <div class="thumbnail-box">
@@ -152,11 +152,22 @@
   <script>
     let chatSocket = null;
     let GET_MESSAGE_URI = null;
+    // 라이브 스트리밍 관련 WebRTC 설정
+    const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
+    const peerConnection = new RTCPeerConnection(configuration);
     const userId = {{request.user.id}}; 
+    const CHATBOT_URL = 'http://localhost:8000/chatting/bot';
     
     {% if goods and chat %}
     connectNewWebsocket({{chat.id}}, {{goods.id}});
     {% endif %}
+
+    // ICE Candidate 처리
+    peerConnection.onicecandidate = function(event) {
+      if (event.candidate) {
+        chatSocket.send(JSON.stringify({'signal_type': 'ice-candidate', 'data': event.candidate}));
+      }
+    };
 
     // chatId에 해당하는 채팅방과 웹소켓을 연결합니다.
     async function connectNewWebsocket(chatId, goodsId) {
@@ -205,13 +216,13 @@
           <div class="contact-info flex-box"> ${result.you_username} <div class="temp"> ${result.you_manner_tmp} </div> </div>
           <div class="goods-box flex-box between">
               <div class="flex-box">
-              <div class="selected-thumbnail-box">
-                  <img src="${result.goods_img}" alt="">
-              </div>
-              <div class="goods-info-box">
-                  <p>${result.goods_title}</p>
-                  <p class="bold">${result.goods_price}원</p>
-              </div>
+                <div class="selected-thumbnail-box">
+                    <img src="${result.goods_img}" alt="">
+                </div>
+                <div class="goods-info-box">
+                    <p>${result.goods_title}</p>
+                    <p class="bold">${result.goods_price}원</p>
+                </div>
               </div>
               ${buttonHTML}
           </div>
@@ -228,7 +239,13 @@
     function socketEventInit() {
       return new Promise(async function (resolve, reject) {
           chatSocket.onopen = async function (e) {
-              const response = await fetch(GET_MESSAGE_URI);
+              const response = await fetch(GET_MESSAGE_URI, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': "{{csrf_token}}"
+                }
+                }
+              );
               const result = await response.json();
               drawMessages(result);
               moveScrollToBottom();
@@ -237,6 +254,7 @@
           // 소켓에서 메시지 응답시 호출되며, 화면에 메시지를 그려줍니다.
           chatSocket.onmessage = function (e) {
               const data = JSON.parse(e.data);
+
               const chatContainer = document.querySelector('.chat-container');
               let html = '';
               if (data.sender == userId) { html = getFromMeHtml(data.message, data.send_date); }
@@ -251,6 +269,27 @@
           };
           resolve();
       });
+    }
+
+    function webRTCSignaling() {
+        // WebRTC 시그널링 메시지 처리
+        if (data.signal_type) {
+          if (data.signal_type === 'offer') {
+            const offer = new RTCSessionDescription(data.data);
+            peerConnection.setRemoteDescription(offer)
+            .then(() => peerConnection.createAnswer())
+            .then(answer => peerConnection.setLocalDescription(answer))
+            .then(() => {
+              chatSocket.send(JSON.stringify({'signal_type': 'answer', 'data': peerConnection.localDescription}));
+            });
+          } else if (data.signal_type === 'answer') {
+            const answer = new RTCSessionDescription(data.data);
+            peerConnection.setRemoteDescription(answer);
+          } else if (data.signal_type === 'ice-candidate') {
+            const iceCandidate = new RTCIceCandidate(data.data);
+            peerConnection.addIceCandidate(iceCandidate);
+          }
+        }
     }
 
     function updateModal(result) {
@@ -280,7 +319,7 @@
     }
 
     // 상대방의 메시지에 해당하는 html을 넘겨줍니다.
-    // TODO: 메시지 받은 시간 동적으로 변경
+
     function getFromYouHtml(message, sendDate) {
       return `
       <div class="message-box from-you">
@@ -310,6 +349,7 @@
       const chatContainer = document.querySelector('.chat-container');
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+
 
     function sendMessage() {
       const messageInputDom = document.querySelector('#chat-textarea');
@@ -360,6 +400,70 @@
         chattingRoom.classList.remove('is-clicked'); 
       }
       e.classList.add('is-clicked');
+    }
+
+    // Offer 생성 및 시작 (통상적으로 버튼 클릭 이벤트에서 호출)
+    function startWebRTCConnection() {
+      peerConnection.createOffer()
+      .then(offer => peerConnection.setLocalDescription(offer))
+      .then(() => {
+        chatSocket.send(JSON.stringify({'signal_type': 'offer', 'data': peerConnection.localDescription}));
+      });
+    }
+
+    // 챗봇 화면을 그려주는 함수입니다.
+    function initChatbot() {
+      const chatMainContainer = document.querySelector('.chat-main-container');
+      chatMainContainer.innerHTML = `
+      <div>
+        <div class="contact-info flex-box"> 
+          AI 챗봇 <div class="temp"> 100.0 </div> 
+        </div>
+
+        <div class="goods-box flex-box between">
+          <div class="flex-box">
+            <div class="selected-thumbnail-box">
+              <img src="{% static 'img/icon_aibot.png'%}" alt="">
+            </div>
+            <div class="goods-info-box">
+              <p>온정과 열정이 가득한 AI 챗봇</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-container">
+        </div>
+      </div>
+      `;
+
+      const html = `
+      <form class="chat-input" onsubmit="return false;">
+        <textarea name="" id="chat-textarea" cols="30" rows="10" placeholder="메세지를 입력해주세요"></textarea>
+        <div> <button id="chat-submit" onclick=sendMessageToChatbot()>전송</button> </div>
+      </form>
+      `;
+      chatMainContainer.insertAdjacentHTML('beforeend', html);
+    }
+
+    // 챗봇에게 메시지를 보내는 함수입니다. 
+    async function sendMessageToChatbot() {
+      const messageInputDom = document.querySelector('#chat-textarea');
+      const chatContainer = document.querySelector('.chat-container');
+      const message = messageInputDom.value;
+      chatContainer.insertAdjacentHTML('beforeend', getFromMeHtml(message, new Date()));
+      messageInputDom.value = '';
+      
+      const response = await fetch(CHATBOT_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': "{{csrf_token}}"
+        },
+        body: new URLSearchParams({
+            'title': message
+        })
+      })
+      const result = await response.json();
+      chatContainer.insertAdjacentHTML('beforeend', getFromYouHtml(result.message, new Date()));
     }
   </script>
 </html>
