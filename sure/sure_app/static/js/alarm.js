@@ -49,6 +49,11 @@ $(document).ready(function() {
 
         dropdown.appendChild(a);
     });
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
 
     function liClickEvent(){
         var aElements = document.querySelectorAll('.alarm');
@@ -63,6 +68,10 @@ $(document).ready(function() {
                 $.ajax({
                     url: '/alarm/read/' + alarmId + '/',
                     type: 'POST',
+                    crossDomain: true,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
                     success: function(data) {
                         window.location.href = link;
                     }
