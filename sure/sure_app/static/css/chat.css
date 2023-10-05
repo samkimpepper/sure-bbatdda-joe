@@ -311,3 +311,45 @@ hr{
     border-radius: 4px;
     margin: 16px;
 }
+
+/* 라이브 스트리밍 */
+#video-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#video-modal div {
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+    background-color: #fffae0;
+    border-radius: 20px;
+}
+
+#video-modal div div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#video-modal div div p {
+    text-align: center;
+    color: #000;
+}
+
+#localVideo{
+    margin: 10px;
+    width: 500px;
+    height: auto;
+}
+
+#remoteVideo{
+    width: 500px;
+    height: auto;
+}
+
+#remoteVideo img{
+    width: 100%;
+}

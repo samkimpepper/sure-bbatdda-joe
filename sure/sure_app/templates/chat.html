@@ -144,8 +144,19 @@
     </div>
 
     <div class="modal" id="video-modal">
-      <video id="localVideo" autoplay playsinline></video>
-      <video id="remoteVideo" autoplay playsinline></video>
+      <span class="close-button">&times;</span>
+      <div>
+        <div>
+          <p>내 화면</p>
+          <video id="localVideo" autoplay playsinline></video>
+        </div>
+        <div>
+          <p>상대방 화면</p>
+          <div id="remoteVideo"> 
+            <img id="remoteImage" src="" alt="Remote Stream">
+          </div>
+        </div>
+      </div>
     </div>
     
     {% include 'footer.html' %}
@@ -162,6 +173,7 @@
     const CHATBOT_URL = 'http://localhost:8000/chatting/bot';
     const remoteVideo = document.querySelector('#remoteVideo'); 
     const localVideo = document.querySelector('#localVideo'); 
+    const videoFlag = true;
 
     {% if goods and chat %}
     connectNewWebsocket({{chat.id}}, {{goods.id}});
@@ -268,16 +280,12 @@
                 }
                 chatContainer.insertAdjacentHTML('beforeend', html);
                 moveScrollToBottom();
-              } else if (data.type === 'image_data') {
+              } else if (data.type === 'image_data' && data.sender !== userId) {
                 const image = new Image();
                 image.src = data.image_data;
                 image.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = image.width;
-                    canvas.height = image.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(image, 0, 0, image.width, image.height);
-                    remoteVideo.src = canvas.toDataURL('image/jpeg');
+                  const remoteImage = document.querySelector('#remoteImage');
+                  remoteImage.src = data.image_data;
                 };
             }
           };
@@ -484,7 +492,7 @@
     async function initVideoWebSocket(chatId) {
       await getMedia();
       showVideoModal();
-      setInterval(sendVideoFrame, 50);
+      setInterval(sendVideoFrame, 150);
     }
 
   </script>
