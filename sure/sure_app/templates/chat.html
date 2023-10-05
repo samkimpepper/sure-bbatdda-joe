@@ -144,7 +144,6 @@
     </div>
 
     <div class="modal" id="video-modal">
-      <span class="close-button">&times;</span>
       <div>
         <div>
           <p>내 화면</p>
@@ -156,6 +155,7 @@
             <img id="remoteImage" src="" alt="Remote Stream">
           </div>
         </div>
+        <span onclick="stopStreaming()" class="close-button">&times;</span>
       </div>
     </div>
     
@@ -173,7 +173,7 @@
     const CHATBOT_URL = 'http://localhost:8000/chatting/bot';
     const remoteVideo = document.querySelector('#remoteVideo'); 
     const localVideo = document.querySelector('#localVideo'); 
-    const videoFlag = true;
+    var videoFlag = true;
 
     {% if goods and chat %}
     connectNewWebsocket({{chat.id}}, {{goods.id}});
@@ -228,7 +228,7 @@
               <div class="temp"> 
                 ${result.you_manner_tmp} 
               </div> 
-              <button onclick='initVideoWebSocket(${chatId})'>스트리밍 시작하기</button>
+              <button class="trade-not-complete" onclick='initVideoWebSocket(${chatId})' style="margin-left: 573px;padding: 6px 12px; border-radius:4px">스트리밍 시작하기</button>
             </div>
             <div class="goods-box flex-box between">
                 <div class="flex-box">
@@ -471,7 +471,7 @@
       localVideo.srcObject = localStream;
     }
     
-    function showVideoModal() {
+    function toggleVideoModal() {
       const videoModal = document.querySelector('#video-modal');
       videoModal.classList.toggle("show-modal");
     }
@@ -489,10 +489,18 @@
         }));
     }
 
+    var isStop = true;
+    var interval;
+
     async function initVideoWebSocket(chatId) {
       await getMedia();
-      showVideoModal();
-      setInterval(sendVideoFrame, 150);
+      toggleVideoModal();
+      interval = setInterval(sendVideoFrame, 150);
+    }
+    
+    function stopStreaming() {
+      clearInterval(interval); 
+      toggleVideoModal();
     }
 
   </script>
