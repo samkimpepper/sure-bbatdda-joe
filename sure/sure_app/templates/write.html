@@ -37,7 +37,7 @@
             </div>
             <div class="full-box">
               <label for="description" class="block-box">물품 설명</label>
-              <textarea name="content" required="required">{% if Goods %}{{ Goods.content }}{% endif %}</textarea>
+              <textarea name="content" required="required">{% if form.instance.content %}{{ form.instance.content }}{% endif %}</textarea>
               <div class="full-box">
                 <label for="location" class="block-box">거래 희망 장소</label>
                 <input type="text" id="search-location" name="location" placeholder="거래를 희망하는 장소" required="required" value="{% if Goods %}{{ Goods.location }}{% endif %}">
@@ -83,9 +83,12 @@
             getCurrentLocation();
           }
 
+        // New function for setting the marker
           function setMarker(position) {
+            // If there is already a marker, remove it
             if (marker) marker.setMap(null);
 
+            // Create a new marker at the specified position
             marker = new kakao.maps.Marker({
               position: position,
               map: map,
