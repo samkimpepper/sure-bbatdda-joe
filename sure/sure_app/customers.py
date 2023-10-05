@@ -1,8 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Message, Chat, User
-from django.core.serializers.json import DjangoJSONEncoder
-from channels.layers import get_channel_layer
 from django.core.cache import cache
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -29,49 +27,47 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     # Receive message from WebSocket
-    async def receive(self, text_data):
+    async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         
-        # WebRTC Signal 처리 (Offer, Answer, ICE Candidates)
-        if "signal_type" in text_data_json:
-            signal_type = text_data_json["signal_type"]
-            data = text_data_json["data"]
+        # 채팅
+        if "image_data" not in text_data_json:
+            chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
+            message = text_data_json["message"] # 메시지 내용 추출
+            sender = text_data_json["sender"]  # 보내는 사람 추출
+            chat = Chat.objects.get(id=chat_id)
+            sender = User.objects.get(id=sender)
+            
+            if chat.user1 == sender: receiver_id = chat.user2.id
+            else: receiver_id = chat.user1.id
+            connected_users = self.get_connected_users(self.room_name)
+            
+            if str(receiver_id) in connected_users:
+                message_obj = Message.objects.create(chat=chat, text=message, sender=sender, status=True) 
+            else:
+                message_obj = Message.objects.create(chat=chat, text=message, sender=sender, status=False)
 
+            # Send message to room group
             await self.channel_layer.group_send(
                 self.room_group_name, {
-                    "type": "chat_signal",
-                    "signal_type": signal_type,
-                    "data": data,
+                    "type": "chat_message",
+                    "message": message,
+                    "send_date": str(message_obj.send_date),
+                    "sender": sender.id,  # username을 함께 전송
                 }
             )
-            return
-        
-        
-        chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
-        message = text_data_json["message"] # 메시지 내용 추출
-        sender = text_data_json["sender"]  # 보내는 사람 추출
-        
-        chat = Chat.objects.get(id=chat_id)
-        sender = User.objects.get(id=sender)
-        
-        if chat.user1 == sender: receiver_id = chat.user2.id
-        else: receiver_id = chat.user1.id
-        connected_users = self.get_connected_users(self.room_name)
-        
-        if str(receiver_id) in connected_users:
-            message_obj = Message.objects.create(chat=chat, text=message, sender=sender, status=True) 
-        else:
-            message_obj = Message.objects.create(chat=chat, text=message, sender=sender, status=False)
+        # 스트리밍 데이터 처리
+        elif "image_data" in text_data_json:
+            # 이미지 데이터를 해당 채팅방의 모든 사용자에게 전송
+            await self.channel_layer.group_send(
+                self.room_group_name, 
+                {
+                    "type": "image_data",
+                    "image_data": text_data_json["image_data"],
+                    "sender": self.scope['user'].id
+                }
+            )
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name, {
-                "type": "chat_message",
-                "message": message,
-                "send_date": str(message_obj.send_date),
-                "sender": sender.id,  # username을 함께 전송
-            }
-        )
 
     # Receive message from room group
     async def chat_message(self, event):
@@ -81,6 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Send message and username to WebSocket
         await self.send(text_data=json.dumps({
+            "type" : "chat_message",
             "message": message,
             "send_date": send_date,
             "sender": sender  # username도 함께 전송
@@ -111,12 +108,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print(f'Connected users for room {room_id} before fetching: {connected_users}')
         return (connected_users)
 
-    async def chat_signal(self, event):
-        signal_type = event["signal_type"]
-        data = event["data"]
-
-        # Send signal data to WebSocket
+    async def image_data(self, event):
+        # 해당 채팅방의 모든 사용자에게 이미지 데이터 전송
         await self.send(text_data=json.dumps({
-            "signal_type": signal_type,
-            "data": data,
+            "type": "image_data",
+            "image_data": event["image_data"],
+            "sender": event["sender"]
         }))
