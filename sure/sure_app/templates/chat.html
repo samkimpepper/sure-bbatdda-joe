@@ -142,6 +142,11 @@
         </div>
       </div>
     </div>
+
+    <div class="modal" id="video-modal">
+      <video id="localVideo" autoplay playsinline></video>
+      <video id="remoteVideo" autoplay playsinline></video>
+    </div>
     
     {% include 'footer.html' %}
 
@@ -151,23 +156,16 @@
   
   <script>
     let chatSocket = null;
+    let videoSocket = null;
     let GET_MESSAGE_URI = null;
-    // 라이브 스트리밍 관련 WebRTC 설정
-    const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
-    const peerConnection = new RTCPeerConnection(configuration);
     const userId = {{request.user.id}}; 
     const CHATBOT_URL = 'http://localhost:8000/chatting/bot';
-    
+    const remoteVideo = document.querySelector('#remoteVideo'); 
+    const localVideo = document.querySelector('#localVideo'); 
+
     {% if goods and chat %}
     connectNewWebsocket({{chat.id}}, {{goods.id}});
     {% endif %}
-
-    // ICE Candidate 처리
-    peerConnection.onicecandidate = function(event) {
-      if (event.candidate) {
-        chatSocket.send(JSON.stringify({'signal_type': 'ice-candidate', 'data': event.candidate}));
-      }
-    };
 
     // chatId에 해당하는 채팅방과 웹소켓을 연결합니다.
     async function connectNewWebsocket(chatId, goodsId) {
@@ -185,7 +183,7 @@
           + '/'
       );
   
-      initGoods().then(() => {
+      initGoods(chatId).then(() => {
           socketEventInit().then(() => {
               drawInputForm();
           })
@@ -197,7 +195,7 @@
       if ( isNew ) { isNew.remove(); }
     }
 
-    function initGoods() {
+    function initGoods(chatId) {
       return new Promise(async function (resolve, reject) {
           const response = await fetch(GET_GOODS_URI);
           const result = await response.json();
@@ -213,21 +211,27 @@
 
           const html = `
           <div>
-          <div class="contact-info flex-box"> ${result.you_username} <div class="temp"> ${result.you_manner_tmp} </div> </div>
-          <div class="goods-box flex-box between">
-              <div class="flex-box">
-                <div class="selected-thumbnail-box">
-                    <img src="${result.goods_img}" alt="">
+            <div class="contact-info flex-box"> 
+              ${result.you_username} 
+              <div class="temp"> 
+                ${result.you_manner_tmp} 
+              </div> 
+              <button onclick='initVideoWebSocket(${chatId})'>스트리밍 시작하기</button>
+            </div>
+            <div class="goods-box flex-box between">
+                <div class="flex-box">
+                  <div class="selected-thumbnail-box">
+                      <img src="${result.goods_img}" alt="">
+                  </div>
+                  <div class="goods-info-box">
+                      <p>${result.goods_title}</p>
+                      <p class="bold">${result.goods_price}원</p>
+                  </div>
                 </div>
-                <div class="goods-info-box">
-                    <p>${result.goods_title}</p>
-                    <p class="bold">${result.goods_price}원</p>
-                </div>
-              </div>
-              ${buttonHTML}
-          </div>
-          <div class="chat-container">
-          </div>
+                ${buttonHTML}
+            </div>
+            <div class="chat-container">
+            </div>
           </div>
           `;
           chatMainContainer.insertAdjacentHTML('afterbegin', html);
@@ -240,10 +244,8 @@
       return new Promise(async function (resolve, reject) {
           chatSocket.onopen = async function (e) {
               const response = await fetch(GET_MESSAGE_URI, {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': "{{csrf_token}}"
-                }
+                  method: 'GET',
+                  headers: {'X-CSRFToken': "{{csrf_token}}"}
                 }
               );
               const result = await response.json();
@@ -252,15 +254,32 @@
           }
       
           // 소켓에서 메시지 응답시 호출되며, 화면에 메시지를 그려줍니다.
+          // 비디오 프레임을 받았을 경우 비디오를 출력해줍니다.
           chatSocket.onmessage = function (e) {
               const data = JSON.parse(e.data);
 
-              const chatContainer = document.querySelector('.chat-container');
-              let html = '';
-              if (data.sender == userId) { html = getFromMeHtml(data.message, data.send_date); }
-              else { html = getFromYouHtml(data.message, data.send_date); }
-              chatContainer.insertAdjacentHTML('beforeend', html);
-              moveScrollToBottom();
+              if (data.type === 'chat_message') {
+                const chatContainer = document.querySelector('.chat-container');
+                let html = '';
+                if (data.sender == userId) { 
+                    html = getFromMeHtml(data.message, data.send_date); 
+                } else { 
+                    html = getFromYouHtml(data.message, data.send_date); 
+                }
+                chatContainer.insertAdjacentHTML('beforeend', html);
+                moveScrollToBottom();
+              } else if (data.type === 'image_data') {
+                const image = new Image();
+                image.src = data.image_data;
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(image, 0, 0, image.width, image.height);
+                    remoteVideo.src = canvas.toDataURL('image/jpeg');
+                };
+            }
           };
       
           // 소켓 연결시 호출됩니다.
@@ -269,27 +288,6 @@
           };
           resolve();
       });
-    }
-
-    function webRTCSignaling() {
-        // WebRTC 시그널링 메시지 처리
-        if (data.signal_type) {
-          if (data.signal_type === 'offer') {
-            const offer = new RTCSessionDescription(data.data);
-            peerConnection.setRemoteDescription(offer)
-            .then(() => peerConnection.createAnswer())
-            .then(answer => peerConnection.setLocalDescription(answer))
-            .then(() => {
-              chatSocket.send(JSON.stringify({'signal_type': 'answer', 'data': peerConnection.localDescription}));
-            });
-          } else if (data.signal_type === 'answer') {
-            const answer = new RTCSessionDescription(data.data);
-            peerConnection.setRemoteDescription(answer);
-          } else if (data.signal_type === 'ice-candidate') {
-            const iceCandidate = new RTCIceCandidate(data.data);
-            peerConnection.addIceCandidate(iceCandidate);
-          }
-        }
     }
 
     function updateModal(result) {
@@ -355,6 +353,7 @@
       const messageInputDom = document.querySelector('#chat-textarea');
       const message = messageInputDom.value;
       chatSocket.send(JSON.stringify({
+        'type': 'chat_message',
         'sender': userId,
         'message': message
       }));
@@ -400,15 +399,6 @@
         chattingRoom.classList.remove('is-clicked'); 
       }
       e.classList.add('is-clicked');
-    }
-
-    // Offer 생성 및 시작 (통상적으로 버튼 클릭 이벤트에서 호출)
-    function startWebRTCConnection() {
-      peerConnection.createOffer()
-      .then(offer => peerConnection.setLocalDescription(offer))
-      .then(() => {
-        chatSocket.send(JSON.stringify({'signal_type': 'offer', 'data': peerConnection.localDescription}));
-      });
     }
 
     // 챗봇 화면을 그려주는 함수입니다.
@@ -465,5 +455,37 @@
       const result = await response.json();
       chatContainer.insertAdjacentHTML('beforeend', getFromYouHtml(result.message, new Date()));
     }
+
+    /* 라이브 스트리밍 관련 함수들 */ 
+    // Webcam에서 미디어 스트림을 가져옴
+    async function getMedia() {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      localVideo.srcObject = localStream;
+    }
+    
+    function showVideoModal() {
+      const videoModal = document.querySelector('#video-modal');
+      videoModal.classList.toggle("show-modal");
+    }
+
+    function sendVideoFrame() {
+        const canvas = document.createElement('canvas');
+        canvas.width = localVideo.videoWidth;
+        canvas.height = localVideo.videoHeight;
+        canvas.getContext('2d').drawImage(localVideo, 0, 0);
+        const imageData = canvas.toDataURL('image/jpeg');
+        
+        chatSocket.send(JSON.stringify({
+            'type': 'video_frame',
+            'image_data': imageData
+        }));
+    }
+
+    async function initVideoWebSocket(chatId) {
+      await getMedia();
+      showVideoModal();
+      setInterval(sendVideoFrame, 50);
+    }
+
   </script>
 </html>
