@@ -1,4 +1,5 @@
-{% load static%}{% load humanize %}
+{% load static %}
+{% load humanize %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -126,6 +127,7 @@
             </div>
           </div>
           <div id="map"></div>
+          <button id="map-btn" class="orange">길 찾기</button>
           {% endblock %}
         </div>
       </div>
@@ -170,7 +172,8 @@
       });
     </script>
 
-    <!--내 위치에서 거래희망장소까지 경로 표시 by 준경-->
+
+    <!-- 카카오 맵을 이용하여 내 위치와 거래장소의 경로 출력 by 준경-->
     <script>
       $(document).ready(function () {
         var myLocationAddress = "{{ user.location }}";
@@ -232,5 +235,43 @@
         });
       });
     </script>
-  </body>
+
+
+    <!--길찾기를 누를 경우 내 위치에서 판매장소까지의 경로를 보여주는 카카오경로찾기서비스로 이동-->
+    <script>
+        // 내 위치에서 목적지까지의 경로 표시 버튼 클릭 시 이벤트
+        $("#map-btn").on("click", function () {
+            var myLocationAddress = "{{ user.location }}";
+            var goodsLocationAddress = "{{ good.location }}";
+
+            // Kakao Maps API 초기화
+            kakao.maps.load(function () {
+                var geocoder = new kakao.maps.services.Geocoder();
+
+                // 내 위치 주소를 좌표로 변환
+                geocoder.addressSearch(myLocationAddress, function (myLocationResult, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        var myLat = myLocationResult[0].y; // 위도
+                        var myLng = myLocationResult[0].x; // 경도
+
+                        // goods.location 주소를 좌표로 변환
+                        geocoder.addressSearch(goodsLocationAddress, function (goodsLocationResult, status) {
+                            if (status === kakao.maps.services.Status.OK) {
+                                var goodsLat = goodsLocationResult[0].y; // 위도
+                                var goodsLng = goodsLocationResult[0].x; // 경도
+
+                                // 이동 경로를 카카오 맵 링크로 열기
+                                //window.location = "https://map.kakao.com/link/to/" + 
+                                //goodsLocationAddress + "," + goodsLat + "," + goodsLng;
+                                window.location = "https://map.kakao.com/?sName=" + 
+                                myLocationAddress + "&eName="+ 
+                                goodsLocationAddress;
+                            }
+                        });
+                    }
+                });
+            });
+        });
+</script>
+</body>
 </html>
