@@ -72,23 +72,27 @@ def login_Form(request):
                     return redirect('main')  # 리다이렉션
         return render(request, 'login.html', {'form': form}) #폼을 템플릿으로 전달
 
-# 동네인증
+#동네인증 by 준경
 @login_required
 def location_auth(request):
 
     location = request.user.location
     return render(request, "location.html", {"location": location})
 
-# 지역설정
+#지역설정 by준경
 @login_required
 def set_location(request):
     if request.method == "POST":
-        location = request.POST.get('region-setting')
+        new_location = request.POST.get('region-setting')
 
-        if location:
+        if new_location:
             try:
-                request.user.location = location
-                request.user.save()
+                user = request.user
+                if user.location != new_location:
+                    user.location_certification = 'N'#위치를 변경할 경우 다시 locaiton_certification=N으로 주기
+                user.location = new_location
+                user.save()
+                messages.success(request, "주소가 업데이트되었습니다.")  
 
                 return redirect('location')
             except Exception as e:
@@ -98,8 +102,7 @@ def set_location(request):
     else:
         return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
 
-
-# 지역인증 완료
+# 지역인증 완료 by 준경
 @login_required
 def set_location_certification(request):
     if request.method == "POST":
