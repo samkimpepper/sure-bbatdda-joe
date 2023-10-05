@@ -31,6 +31,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        
+        # WebRTC Signal 처리 (Offer, Answer, ICE Candidates)
+        if "signal_type" in text_data_json:
+            signal_type = text_data_json["signal_type"]
+            data = text_data_json["data"]
+
+            await self.channel_layer.group_send(
+                self.room_group_name, {
+                    "type": "chat_signal",
+                    "signal_type": signal_type,
+                    "data": data,
+                }
+            )
+            return
+        
+        
         chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
         message = text_data_json["message"] # 메시지 내용 추출
         sender = text_data_json["sender"]  # 보내는 사람 추출
@@ -94,3 +110,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         connected_users = cache.get(connected_users_key, set())
         print(f'Connected users for room {room_id} before fetching: {connected_users}')
         return (connected_users)
+
+    async def chat_signal(self, event):
+        signal_type = event["signal_type"]
+        data = event["data"]
+
+        # Send signal data to WebSocket
+        await self.send(text_data=json.dumps({
+            "signal_type": signal_type,
+            "data": data,
+        }))
