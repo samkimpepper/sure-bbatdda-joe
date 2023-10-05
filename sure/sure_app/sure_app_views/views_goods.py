@@ -54,31 +54,23 @@ def trade_post(request, good_id):
 #글쓰기 페이지 by 진혁
 @login_required
 def write(request, good_id=None):
-    user = request.user
-    if user.location_certification =='Y':#동네인증여부에 따른 접근 처리
-        if good_id:
-            goods = get_object_or_404(Goods, id=good_id)
-            if request.user != goods.user:
-                return redirect('trade_post', good_id=good_id)
-        else:
-            goods = None
-
-        if request.method == "POST":
-            form = GoodsForm(request.POST, request.FILES, instance=goods)
-
-            if form.is_valid():
-                goods = form.save(commit=False)
-                goods.user = request.user
-                goods.save()
-
-                return redirect('trade_post', good_id=goods.id)
-        else:
-            form = GoodsForm(instance=goods)
-
-        return render(request, 'write.html', {'form': form})
+    if good_id:
+        goods = get_object_or_404(Goods, id=good_id)
+        if request.user != goods.user:
+            return redirect('trade_post', good_id=good_id)
     else:
-        return render(request,'location.html')
-    
+        goods = None
+    if request.method == "POST":
+        form = GoodsForm(request.POST, request.FILES, instance=goods)
+        if form.is_valid():
+            goods = form.save(commit=False)
+            goods.user = request.user
+            goods.save()
+            return redirect('trade_post', good_id=goods.id)
+    else:
+        form = GoodsForm(instance=goods)
+    return render(request, 'write.html', {'form': form})
+   
 
 # trade_post 좋아요 버튼 by 진혁
 @login_required
