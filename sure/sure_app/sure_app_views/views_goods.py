@@ -90,6 +90,9 @@ def like_post(request, good_id):
                 Like.objects.create(goods=good, user=user)
                 is_liked = True
 
+            good.like_cnt = Like.objects.filter(goods=good).count()
+            good.save()
+
             return JsonResponse({'is_liked': is_liked})
     else:
         return redirect('login')
