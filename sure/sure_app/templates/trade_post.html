@@ -124,6 +124,30 @@
     {% include 'footer.html' %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+      function setMarker(position) {
+        if (marker) marker.setMap(null);
+
+        marker = new kakao.maps.Marker({
+          position: position,
+          map: map,
+          title: "선택 위치",
+        });
+
+        const locationInputField = document.getElementById("location");
+
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        geocoder.coord2Address(
+          position.getLng(),
+          position.getLat(),
+          function (result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+              const address = result[0].address.address_name;
+              locationInputField.value = address;
+            }
+          }
+        );
+      }
       $(document).ready(function () {
         $(".like-button").on("click", function () {
           var postId = $(this).data("post-id");
