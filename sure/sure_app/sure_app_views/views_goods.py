@@ -144,6 +144,7 @@ def trade_review(request):
 
         content = f"{buyer.username}님이 후기를 보내셨습니다."
         link = "detail/" + str(review.id) + "/"
+        # link = "goods/trade/review/detail/" + str(review.id) + "/"
 
         alarm = Alarm.objects.create(user=seller, content=content, link=link)
 

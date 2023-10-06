@@ -18,11 +18,21 @@ function windowOnClick(event) {
     }
 }
 
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 submitButton.addEventListener('click', function () {
     $.ajax({
         url: '/goods/trade/complete/' + goodsId + '/',
         type: 'POST',
-        success: function(data) {
+        crossDomain: true,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function (data) {
             console.log(data);
         }
     });
