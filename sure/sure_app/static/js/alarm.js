@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     var user_id = document.getElementById('user_id').textContent;
     console.log(user_id);
 
@@ -13,19 +13,19 @@ $(document).ready(function() {
         console.log('서버로부터 데이터 수신:', data);
         console.log(data.type);
 
-        if(data.alarm_cnt > 0) {
+        if (data.alarm_cnt > 0) {
             document.querySelector('.no-alarm').remove();
         }
 
-        if(data.type == "unread_alarms") {
+        if (data.type == "unread_alarms") {
             console.log("unread_alarms");
             $('.alarm_cnt').textContent = data.alarm_cnt;
             console.log(document.getElementById('alarmCnt'));
             console.log($('.alarm_cnt').textContent);
             document.getElementById('alarmCnt').textContent = data.alarm_cnt;
-            
+
             var dropdown = document.querySelector(".dropdown-ul");
-            for(let i=0; i<data.alarm_cnt; i++) {
+            for (let i = 0; i < data.alarm_cnt; i++) {
                 var li = document.createElement('li');
                 li.textContent = data.alarms[i].content;
                 li.setAttribute('data-link', data.alarms[i].link);
@@ -36,10 +36,10 @@ $(document).ready(function() {
             liClickEvent();
             return;
         }
-        else if(data.type == "alarm_cnt") {
+        else if (data.type == "alarm_cnt") {
             document.getElementById('alarmCnt').textContent = data.alarm_cnt;
         }
-        
+
         var dropdown = document.querySelector(".dropdown-ul");
         var a = document.createElement('li');
         a.textContent = data.content;
@@ -55,15 +55,16 @@ $(document).ready(function() {
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    function liClickEvent(){
+    function liClickEvent() {
         var aElements = document.querySelectorAll('.alarm');
 
-        aElements.forEach(function(a) {
-            a.addEventListener('click', function(event) {
+        aElements.forEach(function (a) {
+            a.addEventListener('click', function (event) {
                 event.preventDefault();
                 var alarmId = event.currentTarget.getAttribute('data-alarm-id');
                 var link = event.currentTarget.getAttribute('data-link');
-    
+                const finalLink = 'http://127.0.0.1:8000/goods/trade/review/' + link;
+
                 // 이제 해당 알람을 읽었다고 서버에 알리기 위해 요청할 건데 HTTP 요청을 할지 웹소켓으로 할지 모르겠음
                 $.ajax({
                     url: '/alarm/read/' + alarmId + '/',
@@ -72,8 +73,8 @@ $(document).ready(function() {
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    success: function(data) {
-                        window.location.href = link;
+                    success: function (data) {
+                        window.location.href = finalLink;
                     }
                 });
             });
